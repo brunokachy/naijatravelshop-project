@@ -1,0 +1,1871 @@
+<!-- TOP AREA -->
+<div class="top-area show-onload">
+    <div class="bg-holder full">
+        <div class="bg-front full-height bg-front-mob-rel">
+            <div class="container full-height multitriphgtfix">
+                <div class="rel full-height">
+                    <div class="search-tabs search-tabs-bg search-tabs-bottom mb50">
+                        <div class="tabbable">
+                            <ul class="nav nav-tabs" id="myTab">
+                                <li class="{{flight}}">
+                                    <a href="#tab2" data-toggle="tab">
+                                        <i class="fa fa-plane"></i>
+                                        <span>Flights</span>
+                                    </a>
+                                </li>
+                                <li class="{{hotel}}">
+                                    <a href="#tab1" data-toggle="tab">
+                                        <i class="fa fa-building-o"></i>
+                                        <span>Hotels</span>
+                                    </a>
+                                </li>
+                                <li class="{{visa}}">
+                                    <a href="#tab3" data-toggle="tab">
+                                        <i class="fa fa-map-marker"></i>
+                                        <span>Visa</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane {{flight}}" id="tab2">
+                                    <div class="tabbable">
+                                        <ul class="nav nav-pills nav-sm nav-no-br mb10" id="flightChooseTab">
+                                            <li>
+                                                <a href="#flight-search-1" data-toggle="tab">One Way</a>
+                                            </li>
+                                            <li class="active">
+                                                <a href="#flight-search-2" data-toggle="tab">Round Trip</a>
+                                            </li>
+                                            <!-- <li>
+                                                <a style="cursor:pointer;" (click)="openMultiTrip(multiTrip)">Multiple
+                                                    Trip</a>
+                                            </li> -->
+                                            <li>
+                                                <a href="#flight-search-3" data-toggle="tab">Multiple Trip</a>
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div class="tab-pane" id="flight-search-1">
+                                                <form autocomplete="off" (ngSubmit)="searchFlight('1')"
+                                                    ngNativeValidate>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i class="fa fa-plane input-icon"></i>
+                                                                <label>Flying from</label>
+                                                                <input [(ngModel)]="departure" name="departureCity"
+                                                                    [typeahead]="airports" #departureCity1
+                                                                    typeaheadOptionField="displayName"
+                                                                    [typeaheadOptionsLimit]="7"
+                                                                    (typeaheadOnSelect)="typeaheadOnSelect($event, 'Departure')"
+                                                                    placeholder="Enter name of city or airport" required
+                                                                    autocomplete="off" class="typeahead form-control">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i class="fa fa-plane fa-flip-vertical input-icon"></i>
+                                                                <label>Flying to</label>
+                                                                <input type="text" class="typeahead form-control"
+                                                                    [(ngModel)]="destination" name="destinationCity"
+                                                                    placeholder="Enter name of city or airport"
+                                                                    [typeahead]="airports" #destinationCity1
+                                                                    (typeaheadOnSelect)="typeaheadOnSelect($event, 'Destination')"
+                                                                    [typeaheadOptionsLimit]="7" autocomplete="off"
+                                                                    typeaheadOptionField="displayName" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <label>Seat Class</label>
+                                                                <select class="form-control" name="seatclass"
+                                                                    id="seatclass" [(ngModel)]="seatclass" required>
+                                                                    <option value="1">Economy</option>
+                                                                    <option value="3">Business</option>
+                                                                    <option value="4">First Class</option>
+                                                                    <option value="2">Premium</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <label for="name">No. of Passengers</label>
+                                                                <input type="text" class="form-control"
+                                                                    [outsideClick]="true" [popover]="popTemplate"
+                                                                    name="totalTravellers" id="totalTravellers"
+                                                                    [value]="getTotalTraveller()">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i
+                                                                    class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                                <label>Departure</label>
+                                                                <input type="text" class="date-pick form-control"
+                                                                    name="departureDate" placeholder="Departure date"
+                                                                    [maxDate]="maxDepartureDate"
+                                                                    [minDate]="minDepartureDate" autocomplete="off"
+                                                                    [bsConfig]="{ dateInputFormat: 'ddd Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false }"
+                                                                    required [(ngModel)]="departureDate" bsDatepicker>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button class="btn btn-primary btn-lg" type="submit">Search for
+                                                        Flights</button>
+                                                </form>
+                                            </div>
+                                            <div class="tab-pane active" id="flight-search-2">
+                                                <form autocomplete="off" (ngSubmit)="searchFlight('2')"
+                                                    ngNativeValidate>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i class="fa fa-plane input-icon"></i>
+                                                                <label>Flying from</label>
+                                                                <input [(ngModel)]="departure" name="departureCity"
+                                                                    [typeahead]="airports" #departureCity2
+                                                                    typeaheadOptionField="displayName"
+                                                                    [typeaheadOptionsLimit]="7"
+                                                                    (typeaheadOnSelect)="typeaheadOnSelect($event, 'Departure')"
+                                                                    placeholder="Enter name of city or airport" required
+                                                                    autocomplete="off" class="typeahead form-control">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i class="fa fa-plane fa-flip-vertical input-icon"></i>
+                                                                <label>Flying to</label>
+                                                                <input type="text" class="typeahead form-control"
+                                                                    [(ngModel)]="destination" name="destinationCity"
+                                                                    placeholder="Enter name of city or airport"
+                                                                    [typeahead]="airports" #destinationCity2
+                                                                    (typeaheadOnSelect)="typeaheadOnSelect($event, 'Destination')"
+                                                                    [typeaheadOptionsLimit]="7" autocomplete="off"
+                                                                    typeaheadOptionField="displayName" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <label>Seat Class</label>
+                                                                <select class="form-control" name="seatclass"
+                                                                    id="seatclass" [(ngModel)]="seatclass" required>
+                                                                    <option value="1">Economy</option>
+                                                                    <option value="3">Business</option>
+                                                                    <option value="4">First Class</option>
+                                                                    <option value="2">Premium</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <label for="name">No. of Passengers</label>
+                                                                <input type="text" class="form-control"
+                                                                    [outsideClick]="true" [popover]="popTemplate"
+                                                                    name="totalTravellers" id="totalTravellers"
+                                                                    [value]="getTotalTraveller()">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i
+                                                                    class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                                <label>Departure</label>
+                                                                <input type="text" class="date-pick form-control"
+                                                                    name="departureDate" placeholder="Departure date"
+                                                                    [maxDate]="maxDepartureDate"
+                                                                    [minDate]="minDepartureDate" autocomplete="off"
+                                                                    (bsValueChange)="formatReturnDate($event)"
+                                                                    [bsConfig]="{ dateInputFormat: 'ddd Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false }"
+                                                                    required [(ngModel)]="departureDate" bsDatepicker>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i
+                                                                    class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                                <label>Return</label>
+                                                                <input type="text" class="date-pick form-control"
+                                                                    name="returnDate" id="returnDate"
+                                                                    placeholder="Return date" required
+                                                                    autocomplete="off" [maxDate]="maxReturnDate"
+                                                                    [minDate]="minReturnDate"
+                                                                    [bsConfig]="{ dateInputFormat: 'ddd Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false }"
+                                                                    [(ngModel)]="returnDate" bsDatepicker>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button class="btn btn-primary btn-lg" type="submit">Search for
+                                                        Flights</button>
+                                                </form>
+                                            </div>
+                                            <div class="tab-pane" id="flight-search-3">
+                                                <form autocomplete="off" (ngSubmit)="searchFlight('3')"
+                                                    ngNativeValidate>
+
+                                                    <div class="row" *ngFor="let u of multipleDest; let i = index">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i class="fa fa-plane input-icon"></i>
+                                                                <label>Flying from</label>
+                                                                <input ngModel name="departureCity{{i}}"
+                                                                    [typeahead]="airports"
+                                                                    (typeaheadOnSelect)="typeaheadOnSelectM($event, 'Departure', i)"
+                                                                    [typeaheadOptionsLimit]="7"
+                                                                    typeaheadOptionField="displayName"
+                                                                    placeholder="Enter name of city or airport"
+                                                                    class="typeahead form-control" autocomplete="off"
+                                                                    required />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i class="fa fa-plane fa-flip-vertical input-icon"></i>
+                                                                <label>Flying to</label>
+                                                                <input type="text" class="typeahead form-control"
+                                                                    ngModel name="destinationCity{{i}}"
+                                                                    placeholder="Enter name of city or airport"
+                                                                    [typeahead]="airports"
+                                                                    (typeaheadOnSelect)="typeaheadOnSelectM($event, 'Destination', i)"
+                                                                    [typeaheadOptionsLimit]="7" autocomplete="off"
+                                                                    typeaheadOptionField="displayName" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i
+                                                                    class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                                <label>Departure</label>
+                                                                <input type="text" class="date-pick form-control"
+                                                                    name="u.departureDate" placeholder="Departure date"
+                                                                    [maxDate]="maxDepartureDate"
+                                                                    [minDate]="minDepartureDate" autocomplete="off"
+                                                                    [bsConfig]="{dateInputFormat: 'ddd Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                                                    required [(ngModel)]="u.departureDate" bsDatepicker>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <div>
+                                                                <label class="control-label"> &nbsp; </label>
+                                                                <button type="button" class="btn btn-success btn-sm"
+                                                                    *ngIf="i == 0 && multipleDest.length < 4"
+                                                                    (click)="addDestination()">
+                                                                    <span aria-hidden="true">+ Add</span>
+                                                                </button>
+                                                                <button type="button" class="btn btn-danger btn-sm"
+                                                                    *ngIf="i + 1 == multipleDest.length && i != 1"
+                                                                    (click)="removeDestination()">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <label>No. of Passengers</label>
+                                                                <input type="text" class="form-control"
+                                                                    [outsideClick]="true" [popover]="popTemplate"
+                                                                    name="totalTravellers" id="totalTravellers" required
+                                                                    [value]="getTotalTraveller()">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <label>Seat Class</label>
+                                                                <select class="form-control" name="seatclass"
+                                                                    id="seatclass" [(ngModel)]="seatclass" required>
+                                                                    <option value="1">Economy</option>
+                                                                    <option value="3">Business</option>
+                                                                    <option value="4">First Class</option>
+                                                                    <option value="2">Premium</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button class="btn btn-primary btn-lg" type="submit">Search for
+                                                        Flights</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div #tab1 class="tab-pane {{hotel}}" id="tab1">
+                                    <form autocomplete="off" (ngSubmit)="searchHotel()" ngNativeValidate>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <i class="fa fa-map-marker input-icon"></i>
+                                                    <label>City</label>
+                                                    <input [(ngModel)]="city" name="hotelCity" [typeahead]="hotelCities"
+                                                        typeaheadOptionField="displayName" [typeaheadOptionsLimit]="7"
+                                                        (typeaheadOnSelect)="typeaheadOnSelectH($event)"
+                                                        placeholder="Enter name of city" required autocomplete="off"
+                                                        class="typeahead form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="input-daterange" data-date-format="M d, D">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i
+                                                                    class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                                <label>Check-in</label>
+                                                                <input type="text" class="date-pick form-control"
+                                                                    name="checkinDate" placeholder="Check-in Date"
+                                                                    [maxDate]="maxCheckinDate"
+                                                                    [minDate]="minCheckinDate"
+                                                                    [bsConfig]="{ dateInputFormat: 'ddd Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                                                    (bsValueChange)="formateCheckoutDate($event)"
+                                                                    required [(ngModel)]="checkinDate" bsDatepicker>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group form-group-lg form-group-icon-left">
+                                                                <i
+                                                                    class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                                <label>Check-out</label>
+                                                                <input type="text" class="date-pick form-control"
+                                                                    name="checkoutDate" placeholder="Check-out Date"
+                                                                    [maxDate]="maxCheckoutDate"
+                                                                    [minDate]="minCheckoutDate"
+                                                                    [bsConfig]="{ dateInputFormat: 'ddd Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false }"
+                                                                    required [(ngModel)]="checkoutDate" bsDatepicker>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div
+                                                                class="form-group form-group-lg form-group-select-plus">
+                                                                <label>Rooms</label>
+                                                                <select class="form-control"
+                                                                    (ngModelChange)="checkRooms($event)"
+                                                                    name="noOfRooms" [(ngModel)]="noOfRooms" required>
+                                                                    <option value="1">1</option>
+                                                                    <option value="2">2</option>
+                                                                    <option value="3">3</option>
+                                                                    <option value="4">4</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-3" *ngFor="let u of roomDetailLists; let i = index">
+                                                <label>Room {{i + 1}} Guests</label>
+                                                <div class="col-md-6">
+                                                    <div class="form-group form-group form-group-select-plus">
+                                                        <label for="noOfRooms">Adults (12yrs+)</label>
+                                                        <select class="form-control" name="adult{{i}}"
+                                                            (ngModelChange)="setAdultAge($event, i)"
+                                                            [(ngModel)]="u.numberOfAdults" required>
+                                                            <option value="1">1</option>
+                                                            <option value="2">2</option>
+                                                            <option value="3">3</option>
+                                                            <option value="4">4</option>
+                                                            <option value="5">5</option>
+                                                            <option value="6">6</option>
+                                                            <option value="7">7</option>
+                                                            <option value="8">8</option>
+                                                            <option value="9">9</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group form-group form-group-select-plus">
+                                                        <label for="child{{i}}">Child(0 - 11yrs)</label>
+                                                        <select class="form-control" name="child{{i}}"
+                                                            (ngModelChange)="setChildrenAge($event, i)"
+                                                            [(ngModel)]="u.numberOfChildren" required>
+                                                            <option value="0">0</option>
+                                                            <option value="1">1</option>
+                                                            <option value="2">2</option>
+                                                            <option value="3">3</option>
+                                                            <!-- <option value="4">4</option> -->
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4"
+                                                    *ngFor="let v of u.childrenAgeList; let j = index">
+                                                    <div class="form-group form-group-sm form-group-select-plus">
+                                                        <label for="childAge{{j}}">Age {{j + 1}}</label>
+                                                        <select class="form-control" name="childAge{{i}}{{j}}"
+                                                            [(ngModel)]="roomDetailLists[i].childrenAgeList[j]"
+                                                            required>
+                                                            <option value="0">0</option>
+                                                            <option value="1">1</option>
+                                                            <option value="2">2</option>
+                                                            <option value="3">3</option>
+                                                            <option value="4">4</option>
+                                                            <option value="5">5</option>
+                                                            <option value="6">6</option>
+                                                            <option value="7">7</option>
+                                                            <option value="8">8</option>
+                                                            <option value="9">9</option>
+                                                            <option value="10">10</option>
+                                                            <option value="11">11</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary btn-lg" type="submit">Search for Hotels</button>
+                                    </form>
+                                </div>
+                                <div #tab3 class="tab-pane {{visa}}" id="tab3">
+                                    <p>Welcome to our Visa Assistance Page.</p>
+                                    <p style="font-size: smaller;">NaijaTravelShop provides Visa Assistance Services to
+                                        the following destinations: <span
+                                            style="font-size: larger; color: green;">Dubai, Europe
+                                            -Schengen, South Africa, United Kingdom, United States of America, Canada
+                                            and Africa Regions. </span>
+                                    </p>
+                                    <p style="font-size: smaller">Kindly complete the questionnaire below to enable us
+                                        evaluate your Visa Assistance Request and advise you on how best to go about
+                                        your application with higher chances of success.</p>
+                                    <div *ngFor="let alert of alerts">
+                                        <alert [type]="alert.type" [dismissOnTimeout]="alert.timeout"
+                                            (onClosed)="onClosed(alert)">
+                                            {{ alert.msg }}</alert>
+                                    </div>
+                                    <form autocomplete="off" (ngSubmit)="visaRequestSubmit()" ngNativeValidate>
+                                        <fieldset>
+                                            <legend>Personal Details</legend>
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>First name </small><small style="color: red;">*as
+                                                                on
+                                                                your
+                                                                passport</small></label>
+                                                        <input #visaAlert [(ngModel)]="visaRequest.firstName"
+                                                            type="text" name="firstName" class="form-control"
+                                                            required />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>Other name(s) </small><small
+                                                                style="color: red;">*as on
+                                                                passport</small></label>
+                                                        <input [(ngModel)]="visaRequest.lastName" type="text"
+                                                            name="lastName" class="form-control" required/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>&nbsp;</label>
+                                                        <input [(ngModel)]="visaRequest.middleName" type="text"
+                                                            name="middleName" class="form-control" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>Email</small></label>
+                                                        <input [(ngModel)]="visaRequest.email" type="email" name="email"
+                                                            class="form-control" required />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>Phone number</small></label>
+                                                        <input [(ngModel)]="visaRequest.phoneNumber" type="text"
+                                                            name="phoneNumber" class="form-control" required />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>International passport number</small></label>
+                                                        <input [(ngModel)]="visaRequest.passportNumber" type="text"
+                                                            name="passportNumber" class="form-control" required />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group form-group-icon-left">
+                                                        <i class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                        <label><small>Date of issue</small></label>
+                                                        <input type="text" class="date-pick form-control"
+                                                            name="passportIssueDate"
+                                                            (bsValueChange)="formatPassportExpireDate($event)"
+                                                            [bsConfig]="{dateInputFormat: 'Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                                            required [(ngModel)]="visaRequest.passportIssueDate"
+                                                            bsDatepicker>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group form-group-icon-left">
+                                                        <i class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                        <label><small>Date of expiry</small></label>
+                                                        <input type="text" class="date-pick form-control"
+                                                            name="passportExpiryDate" [minDate]="minPassportExpireDate"
+                                                            [bsConfig]="{dateInputFormat: 'Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                                            required [(ngModel)]="visaRequest.passportExpiryDate"
+                                                            bsDatepicker>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>Country of residence</small></label>
+                                                        <select class="form-control" name="residentCountry"
+                                                            [(ngModel)]="visaRequest.residentCountry" required>
+                                                            <option *ngFor="let c of countries">{{c.name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>Your nationality</small></label>
+                                                        <select class="form-control" name="nationality"
+                                                            [(ngModel)]="visaRequest.nationality" required>
+                                                            <option *ngFor="let c of countries">{{c.name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group form-group-icon-left">
+                                                        <i class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                        <label><small>Travel date</small></label>
+                                                        <input type="text" class="date-pick form-control"
+                                                            name="travelDate" [maxDate]="maxDepartureDate"
+                                                            [minDate]="minDepartureDate"
+                                                            (bsValueChange)="formatVisaReturnDate($event)"
+                                                            [bsConfig]="{dateInputFormat: 'Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                                            required [(ngModel)]="visaRequest.travelDate" bsDatepicker>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group form-group-icon-left">
+                                                        <i class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                        <label><small>Return date</small></label>
+                                                        <input type="text" class="date-pick form-control"
+                                                            name="visaReturnDate" [maxDate]="maxVisaReturnDate"
+                                                            [minDate]="minVisaReturnDate"
+                                                            [bsConfig]="{dateInputFormat: 'Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                                            required [(ngModel)]="visaRequest.returnDate" bsDatepicker>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <div class="gap"></div>
+                                        <fieldset>
+                                            <legend>Travel History</legend>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label><small>Country to which you wish to apply for a
+                                                                Visa</small></label>
+                                                        <select class="form-control" name="destinationCountry"
+                                                            [(ngModel)]="visaRequest.destinationCountry" required>
+                                                            <option></option>
+                                                            <option *ngFor="let dest of visaCountries">{{dest.name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label><small>Have you visited this country
+                                                                previously?</small></label>
+                                                        <select class="form-control" name="visitedPreviously"
+                                                            [(ngModel)]="visaRequest.visitedPreviously" required>
+                                                            <option>No</option>
+                                                            <option>Once</option>
+                                                            <option>Twice</option>
+                                                            <option>Thrice</option>
+                                                            <option>Severally</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="control-label">
+                                                        <small>Has your visa application to this country rejected
+                                                            before?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="rejectedPreviously" [value]="true"
+                                                            name="rejectedPreviously"
+                                                            [(ngModel)]="visaRequest.rejectedPreviously">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="rejectedPreviously" [value]="false"
+                                                            name="rejectedPreviously"
+                                                            [(ngModel)]="visaRequest.rejectedPreviously">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" *ngIf="visaRequest.rejectedPreviously">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label><small>How many times did you apply?</small></label>
+                                                        <select class="form-control" name="timesAppliedPreviously"
+                                                            [(ngModel)]="visaRequest.timesAppliedPreviously">
+                                                            <option>No</option>
+                                                            <option>Once</option>
+                                                            <option>Twice</option>
+                                                            <option>Thrice</option>
+                                                            <option>Severally</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <div class="form-group form-group-lg form-group-icon-left">
+                                                        <label><small>What was the reason for your previous
+                                                                rejection?</small></label>
+                                                        <textarea rows="50" cols="50" class="form-control"
+                                                            name="rejectionReason"
+                                                            [(ngModel)]="visaRequest.rejectionReason">
+                                                                                                        </textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="control-label">
+                                                        <small>Has the reason for the rejection
+                                                            changed?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="reasonRejectionChanged" [value]="true"
+                                                            name="reasonRejectionChanged"
+                                                            [(ngModel)]="visaRequest.reasonRejectionChanged">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="reasonRejectionChanged" [value]="false"
+                                                            name="reasonRejectionChanged"
+                                                            [(ngModel)]="visaRequest.reasonRejectionChanged">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <label class="control-label">
+                                                        <small>Have you ever visited any country in
+                                                            Europe or America before?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="visitedTopCountryBefore" [value]="true"
+                                                            name="visitedTopCountryBefore"
+                                                            [(ngModel)]="visaRequest.visitedTopCountryBefore">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="visitedTopCountryBefore" [value]="false"
+                                                            name="visitedTopCountryBefore"
+                                                            [(ngModel)]="visaRequest.visitedTopCountryBefore">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2" *ngIf="visaRequest.visitedTopCountryBefore">
+                                                    <div class="form-group">
+                                                        <label><small>Which country?</small></label>
+                                                        <select class="form-control" name="topCountryVisited"
+                                                            [(ngModel)]="visaRequest.topCountryVisited" required>
+                                                            <option *ngFor="let c of naeuCountries">{{c.name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4" *ngIf="visaRequest.visitedTopCountryBefore">
+                                                    <label class="control-label">
+                                                        <small>Have you
+                                                            ever been deported from any country in Europe or
+                                                            America?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="deportedBefore" [value]="true"
+                                                            name="deportedBefore"
+                                                            [(ngModel)]="visaRequest.deportedBefore">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="deportedBefore" [value]="false"
+                                                            name="deportedBefore"
+                                                            [(ngModel)]="visaRequest.deportedBefore">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="control-label">
+                                                        <small>Are you involved in any terrorist group
+                                                            or terrorist activities?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="involvedInTerrorism" [value]="true"
+                                                            name="involvedInTerrorism"
+                                                            [(ngModel)]="visaRequest.involvedInTerrorism">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="involvedInTerrorism" [value]="false"
+                                                            name="involvedInTerrorism"
+                                                            [(ngModel)]="visaRequest.involvedInTerrorism">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label class="control-label">
+                                                        <small>Have you
+                                                            been arrested or charged with a crime in any country in
+                                                            Europe, America or Asia?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="arrestedBefore" [value]="true"
+                                                            name="arrestedBefore"
+                                                            [(ngModel)]="visaRequest.arrestedBefore">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="arrestedBefore" [value]="false"
+                                                            name="arrestedBefore"
+                                                            [(ngModel)]="visaRequest.arrestedBefore">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="control-label">
+                                                        <small>Have you ever overstayed or exceeded
+                                                            the period of your visa in an America, Canada, Australia
+                                                            or any country in Europe?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="overStayedTopCountryBefore"
+                                                            [value]="true" name="overStayedTopCountryBefore"
+                                                            [(ngModel)]="visaRequest.overStayedTopCountryBefore">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="overStayedTopCountryBefore"
+                                                            [value]="false" name="overStayedTopCountryBefore"
+                                                            [(ngModel)]="visaRequest.overStayedTopCountryBefore">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                                <div *ngIf="visaRequest.overStayedTopCountryBefore" class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label><small>In which country did you overstay or exceed your
+                                                                visa period? </small></label>
+                                                        <select class="form-control" name="topCountryOverstayed"
+                                                            [(ngModel)]="visaRequest.topCountryOverstayed" required>
+                                                            <option *ngFor="let c of naeuCountries">{{c.name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </fieldset>
+                                        <div class="gap"></div>
+                                        <fieldset>
+                                            <legend>Employment or Business Details</legend>
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label><small>Employment status</small></label>
+                                                        <select class="form-control" name="employmentStatus"
+                                                            [(ngModel)]="visaRequest.employmentStatus" required>
+                                                            <option value="Unemployed">Unemployed</option>
+                                                            <option value="Employed">I am currently employed</option>
+                                                            <option value="Businessowner">I run or own a business
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" *ngIf="visaRequest.employmentStatus == 'Employed'">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label><small>Name of employer</small></label>
+                                                        <input [(ngModel)]="visaRequest.employerName" type="text"
+                                                            name="employerName" class="form-control" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label><small>Position in the company</small></label>
+                                                        <input [(ngModel)]="visaRequest.positionInCompany" type="text"
+                                                            name="positionInCompany" class="form-control" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group form-group-icon-left">
+                                                        <i class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                        <label><small>Current employment resumption date</small></label>
+                                                        <input type="text" class="date-pick form-control"
+                                                            name="employmentResumptionDate"
+                                                            [bsConfig]="{dateInputFormat: 'Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                                            required [(ngModel)]="visaRequest.employmentResumptionDate"
+                                                            bsDatepicker>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label><small>Salary range</small></label>
+                                                        <select class="form-control" name="salaryRange"
+                                                            [(ngModel)]="visaRequest.salaryRange" required>
+                                                            <option>&#8358;100,000 to &#8358;500,000</option>
+                                                            <option>&#8358;500,000 to &#8358;1,000,000</option>
+                                                            <option>Above &#8358;1,000,000</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" *ngIf="visaRequest.employmentStatus == 'Businessowner'">
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>Nature of business</small></label>
+                                                        <input [(ngModel)]="visaRequest.natureOfBusiness" type="text"
+                                                            name="natureOfBusiness" class="form-control" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>Name of business</small></label>
+                                                        <input [(ngModel)]="visaRequest.nameOfBusiness" type="text"
+                                                            name="nameOfBusiness" class="form-control" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>Monthly turnover</small></label>
+                                                        <select class="form-control" name="monthlyTurnover"
+                                                            [(ngModel)]="visaRequest.monthlyTurnover" required>
+                                                            <option>&#8358;100,000 to &#8358;1,000,000</option>
+                                                            <option>&#8358;1,000,000 to &#8358;10,000,000</option>
+                                                            <option>Above &#8358;10,000,000</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <div class="form-group">
+                                                        <label><small>No. of staff</small></label>
+                                                        <input [(ngModel)]="visaRequest.noOfStaff" type="number"
+                                                            name="noOfStaff" class="form-control" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="control-label">
+                                                        <small>Is your company registered or
+                                                            incorporated?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="isBusinessRegistered" [value]="true"
+                                                            name="isBusinessRegistered"
+                                                            [(ngModel)]="visaRequest.isBusinessRegistered">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="isBusinessRegistered" [value]="false"
+                                                            name="isBusinessRegistered"
+                                                            [(ngModel)]="visaRequest.isBusinessRegistered">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="control-label">
+                                                        <small>Are you applying with the name of your
+                                                            company or in your individual capacity?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="applicationCapacity" [value]="true"
+                                                            name="applicationCapacity"
+                                                            [(ngModel)]="visaRequest.applicationCapacity">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="applicationCapacity" [value]="false"
+                                                            name="applicationCapacity"
+                                                            [(ngModel)]="visaRequest.applicationCapacity">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <label class="control-label">
+                                                        <small>Do you have a valid bank account with
+                                                            credible cash flows from employment or
+                                                            business?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="hasCashFlow" [value]="true"
+                                                            name="hasCashFlow" [(ngModel)]="visaRequest.hasCashFlow">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="hasCashFlow" [value]="false"
+                                                            name="hasCashFlow" [(ngModel)]="visaRequest.hasCashFlow">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="control-label">
+                                                        <small>Is the average account balance always
+                                                            low?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="isAccountBalanceLow" [value]="true"
+                                                            name="isAccountBalanceLow"
+                                                            [(ngModel)]="visaRequest.isAccountBalanceLow">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="isAccountBalanceLow" [value]="false"
+                                                            name="isAccountBalanceLow"
+                                                            [(ngModel)]="visaRequest.isAccountBalanceLow">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="control-label">
+                                                        <small>Do you use the account for
+                                                            activity other than your employment or your business
+                                                            which brings significant inflows into the
+                                                            account?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="duplicateAccountFunction" [value]="true"
+                                                            name="duplicateAccountFunction"
+                                                            [(ngModel)]="visaRequest.duplicateAccountFunction">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="duplicateAccountFunction"
+                                                            [value]="false" name="duplicateAccountFunction"
+                                                            [(ngModel)]="visaRequest.duplicateAccountFunction">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="control-label">
+                                                        <small>If the embassy requires you to, can you
+                                                            provide explanation to the sources of funds in the
+                                                            account?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="provideFundSource" [value]="true"
+                                                            name="provideFundSource"
+                                                            [(ngModel)]="visaRequest.provideFundSource">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="provideFundSource" [value]="false"
+                                                            name="provideFundSource"
+                                                            [(ngModel)]="visaRequest.provideFundSource">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <div class="gap"></div>
+                                        <fieldset>
+                                            <legend>Purpose of Travel and Travel Plans </legend>
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label><small>What is the purpose of your visit?</small></label>
+                                                        <select class="form-control" name="travelPurpose"
+                                                            [(ngModel)]="visaRequest.travelPurpose" required>
+                                                            <option>Tourism</option>
+                                                            <option>Business</option>
+                                                            <option>Pilgrimage</option>
+                                                            <option>Training</option>
+                                                            <option>School</option>
+                                                            <option>Medical</option>
+                                                            <option>Other Purposes</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3"
+                                                    *ngIf="visaRequest.travelPurpose == 'Other Purposes'">
+                                                    <div class="form-group">
+                                                        <label><small>Other purposes</small></label>
+                                                        <input [(ngModel)]="visaRequest.otherPurposes" type="text"
+                                                            name="otherPurposes" class="form-control" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group form-group-icon-left">
+                                                        <label><small>Where would you be staying during your
+                                                                visit?</small></label>
+                                                        <select class="form-control" name="placeToStay"
+                                                            [(ngModel)]="visaRequest.placeToStay" required>
+                                                            <option>Hotel</option>
+                                                            <option>Rented apartment</option>
+                                                            <option>Staying with a host in-country</option>
+                                                            <option>Attending an even which covers accommmodation
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="control-label">
+                                                        <small>Would you need an invitation
+                                                            letter from a citizen or resident of this country to
+                                                            support your application?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="needInvitationLetter" [value]="true"
+                                                            name="needInvitationLetter"
+                                                            [(ngModel)]="visaRequest.needInvitationLetter">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="needInvitationLetter" [value]="false"
+                                                            name="needInvitationLetter"
+                                                            [(ngModel)]="visaRequest.needInvitationLetter">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label class="control-label">
+                                                        <small>If yes, would your invitee be hosting
+                                                            you in-country?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="willInviteeHostYou" [value]="true"
+                                                            name="willInviteeHostYou"
+                                                            [(ngModel)]="visaRequest.willInviteeHostYou">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="willInviteeHostYou" [value]="false"
+                                                            name="willInviteeHostYou"
+                                                            [(ngModel)]="visaRequest.willInviteeHostYou">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group form-group-icon-left">
+                                                        <label><small>Do you plan to return from this country after your
+                                                                visit or before the expiration of your
+                                                                visa?</small></label>
+                                                        <select class="form-control" name="planToReturn"
+                                                            [(ngModel)]="visaRequest.planToReturn" required>
+                                                            <option>Yes</option>
+                                                            <option>No</option>
+                                                            <option>I don't know</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="control-label">
+                                                        <small>Do you require a medical or welfare
+                                                            insurance during your visit?</small></label>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="requireInsurance" [value]="true"
+                                                            name="requireInsurance"
+                                                            [(ngModel)]="visaRequest.requireInsurance">
+                                                        <label>Yes</label>
+                                                    </div>
+                                                    <div class="radio-custom radio-primary radio-inline">
+                                                        <input type="radio" id="requireInsurance" [value]="false"
+                                                            name="requireInsurance"
+                                                            [(ngModel)]="visaRequest.requireInsurance">
+                                                        <label>No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <div class="gap"></div>
+                                        <fieldset>
+                                            <legend>Other Information </legend>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group form-group-lg form-group-icon-left">
+                                                        <label><small>Additional information</small></label>
+                                                        <textarea rows="50" cols="50" class="form-control"
+                                                            name="additionalInfo"
+                                                            [(ngModel)]="visaRequest.additionalInfo">
+                                                                                                                </textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group form-group-lg form-group-icon-left">
+                                                        <label><small>Other special circumstances</small></label>
+                                                        <textarea rows="50" cols="50" class="form-control"
+                                                            name="specialCircumstance"
+                                                            [(ngModel)]="visaRequest.specialCircumstance">
+                                                                                                                </textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label>
+                                                    <input class="i-check" name="visaAttestation" type="checkbox"
+                                                        [(ngModel)]="visaRequest.visaAttestation" checked
+                                                        required /><small style="color: red;">I
+                                                        understand that
+                                                        NaijaTravelShop offers a Visa Assistance Service only. This
+                                                        means
+                                                        that the Company does not guarantee the issuance or otherwise of
+                                                        any
+                                                        visa requested by me. I also understand that the grant or
+                                                        approval
+                                                        of my visa applications is entirely at the discretion of the
+                                                        embassy, consular office or high commission that the visa
+                                                        application is presented to. NaijaTravelShop will help me
+                                                        Package
+                                                        the application in line with the visa requirements and provide
+                                                        logistic support in my interactions with the embassy or visa
+                                                        office.</small>
+                                                </label>
+                                                <label>
+                                                    <input class="i-check" name="infoAttestation" type="checkbox"
+                                                        [(ngModel)]="visaRequest.infoAttestation" checked
+                                                        required /><small style="color: red;">I
+                                                        hereby confirm that
+                                                        the above information was provided by me and confirm that the
+                                                        information provided are true and accurate. I confirm further
+                                                        that NaijaTravelShop can rely on the details I’ve provided above
+                                                        to evaluate my visa assistance request and any other travel
+                                                        purchase I may make from the Company.</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group form-group form-group-icon-left">
+                                                    <label>&nbsp;</label>
+                                                    <button class="btn btn-primary" type="submit">Submit
+                                                        Request</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </form>
+                                    <!-- <form autocomplete="off" (ngSubmit)="visaRequestSubmit()" ngNativeValidate>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <label>First name</label>
+                                                    <input [(ngModel)]="visaRequest.firstName" type="text"
+                                                        name="firstName" placeholder="First name" class="form-control"
+                                                        autocomplete="off" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <label>Last name</label>
+                                                    <input [(ngModel)]="visaRequest.lastName" type="text"
+                                                        name="lastName" placeholder="Last name" class="form-control"
+                                                        autocomplete="off" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <label>Email</label>
+                                                    <input [(ngModel)]="visaRequest.email" type="email" name="email"
+                                                        placeholder="Email" class="form-control" autocomplete="off"
+                                                        required />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <label>Phone number</label>
+                                                    <input [(ngModel)]="visaRequest.phoneNumber" type="text"
+                                                        name="phoneNumber" placeholder="Phone number"
+                                                        class="form-control" autocomplete="off" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <i class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                    <label>Departure date</label>
+                                                    <input type="text" class="date-pick form-control"
+                                                        name="visaDepartureDate" placeholder="Departure date"
+                                                        [maxDate]="maxDepartureDate" [minDate]="minDepartureDate"
+                                                        autocomplete="off"
+                                                        (bsValueChange)="formatVisaReturnDate($event)"
+                                                        [bsConfig]="{dateInputFormat: 'ddd Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                                        required [(ngModel)]="visaDepartureDate" bsDatepicker>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <i class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                                    <label>Return date</label>
+                                                    <input type="text" class="date-pick form-control"
+                                                        name="visaReturnDate" placeholder="Return date"
+                                                        [maxDate]="maxVisaReturnDate" [minDate]="minVisaReturnDate"
+                                                        autocomplete="off"
+                                                        [bsConfig]="{dateInputFormat: 'ddd Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                                        required [(ngModel)]="visaReturnDate" bsDatepicker>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <label>Country of residence</label>
+                                                    <select class="form-control" name="countryOfResidence"
+                                                        [(ngModel)]="visaRequest.countryOfResidence" required>
+                                                        <option *ngFor="let c of countries">{{c.name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <label>Destination country</label>
+                                                    <select class="form-control" name="destinationCountry"
+                                                        [(ngModel)]="visaRequest.destinationCountry" required>
+                                                        <option *ngFor="let c of countries">{{c.name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <label>Message</label>
+                                                    <textarea rows="50" cols="50" class="form-control" name="message"
+                                                        [(ngModel)]="visaRequest.message" placeholder="Message">
+                                                                                        </textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group form-group-lg form-group-icon-left">
+                                                    <label>&nbsp;</label>
+                                                    <button class="btn btn-primary btn-lg" type="submit">Submit
+                                                        Request</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="owl-carousel owl-slider owl-carousel-area" id="owl-carousel-slider" data-nav="false">
+            <div class="bg-holder full">
+                <div class="bg-img" style="background-image:url(assets/images/slide01.jpg);"></div>
+            </div>
+            <div class="bg-holder full">
+                <div class="bg-img" style="background-image:url(assets/images/slide02.jpg);"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END TOP AREA  -->
+<div class="container-fluid bg-white pt-50 pb-50" *ngIf="topDeals !== null && topDeals.length > 0">
+    <div class="container">
+        <div class="carousel-nav">
+            <span class="fa fa-chevron-left prev2"></span> <span class="fa fa-chevron-right next2"></span>
+        </div>
+        <h3 class="text-left fw-bold dark-blue mb20">Latest Flight Deals</h3>
+
+        <div class="row row-wrap flight-slide">
+            <div class="col-md-3" *ngFor="let deal of topDeals">
+                <div class="thumb last-minute-card">
+                    <header class="thumb-logo">
+                        <a class="hover-img" href="#">
+                            <img src="https://api.travelbeta.com/get-airline-image/{{deal.airlineCode}}"
+                                alt="{{deal.airlineName}}" title="{{deal.airlineName}}">
+                        </a>
+                    </header>
+                    <div class="primary-bg p-20 text-white">
+
+                        <h5 class="thumb-title fs-l fw-semibold">
+                            {{deal.originCityName}} - {{deal.destinationCityName}}
+                        </h5>
+                        <p>
+                            <small>
+                                Availability: {{formatTopDealDate(deal.availibilityStartDate)}} -
+                                {{formatTopDealDate(deal.availibilityEndDate)}}</small>
+                        </p>
+                        <p class="mt-10">
+                            <span class="fs-xl fw-semibold">₦{{formatCurrency(deal.dealAmountInKobo)|number}}</span>
+                            <button class="btn btn-orange pull-right fs-s" (click)="bookTopDeal(deal)"
+                                type="button">Book Now</button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <div class="container-fluid bg-light-grey2 pt-50 pb-50">
+    <div class="container">
+        <div class="carousel-nav">
+            <span class="fa fa-chevron-left prev"></span> <span class="fa fa-chevron-right next"></span>
+        </div>
+        <h3 class="text-left fw-bold dark-blue mb20">Latest Hotel Deals</h3>
+        <div class="row row-wrap hotel-slide">
+            <div class="col-md-3">
+                <div class="thumb last-minute-card">
+                    <header class="thumb-header">
+                        <a class="hover-img" href="#">
+                            <img src="assets/img/waldorf-astoria.png" alt="Waldorf Astoria New York"
+                                title="Waldorf Astoria New York" />
+                            <h5 class="hover-title-center">Book Now</h5>
+                        </a>
+                    </header>
+                    <div class="last-minute-caption">
+                        <ul class="icon-group text-tiny text-color">
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star-half-empty"></i>
+                            </li>
+                        </ul>
+                        <h5 class="thumb-title">
+                            <a class="dark-blue" href="#">Waldorf Astoria New York</a>
+                        </h5>
+                        <p class="mb0">
+                            <small>
+                                <i class="fa fa-map-marker"></i> Flushing, NY (LaGuardia Airport (LGA))</small>
+                        </p>
+                        <p class="mb0 dark-blue">
+                            <span class="fs-xl fw-semibold brand-orange">₦30,000</span>
+                            <small> per night</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="thumb last-minute-card">
+                    <header class="thumb-header">
+                        <a class="hover-img" href="#">
+                            <img src="assets/img/waldorf-astoria.png" alt="Image Alternative text"
+                                title="hotel PORTO BAY RIO INTERNACIONAL de luxe" />
+                            <h5 class="hover-title-center">Book Now</h5>
+                        </a>
+                    </header>
+                    <div class="last-minute-caption">
+                        <ul class="icon-group text-tiny text-color">
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                        </ul>
+                        <h5 class="thumb-title">
+                            <a class="dark-blue" href="#">The London NYC</a>
+                        </h5>
+                        <p class="mb0">
+                            <small>
+                                <i class="fa fa-map-marker"></i> New York, NY (Chelsea)</small>
+                        </p>
+                        <p class="mb0 dark-blue">
+                            <span class="fs-xl fw-semibold brand-orange">₦17,000</span>
+                            <small> / per night</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="thumb last-minute-card">
+                    <header class="thumb-header">
+                        <a class="hover-img" href="#">
+                            <img src="assets/img/waldorf-astoria.png" alt="Image Alternative text" title="hotel 1" />
+                            <h5 class="hover-title-center">Book Now</h5>
+                        </a>
+                    </header>
+                    <div class="last-minute-caption">
+                        <ul class="icon-group text-tiny text-color">
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star-half-empty"></i>
+                            </li>
+                        </ul>
+                        <h5 class="thumb-title">
+                            <a class="dark-blue" href="#">Grand Hyatt New York</a>
+                        </h5>
+                        <p class="mb0">
+                            <small>
+                                <i class="fa fa-map-marker"></i> Ozone Park, NY (Kennedy Airport (JFK))</small>
+                        </p>
+                        <p class="mb0 dark-blue">
+                            <span class="fs-xl fw-semibold brand-orange">₦26,000</span>
+                            <small> /per night</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="thumb last-minute-card">
+                    <header class="thumb-header">
+                        <a class="hover-img" href="#">
+                            <img src="assets/img/waldorf-astoria.png" alt="Waldorf Astoria New York"
+                                title="Waldorf Astoria New York" />
+                            <h5 class="hover-title-center">Book Now</h5>
+                        </a>
+                    </header>
+                    <div class="last-minute-caption">
+                        <ul class="icon-group text-tiny text-color">
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star-o"></i>
+                            </li>
+                        </ul>
+                        <h5 class="thumb-title">
+                            <a class="dark-blue" href="#">Affinia Shelburne</a>
+                        </h5>
+                        <p class="mb0">
+                            <small>
+                                <i class="fa fa-map-marker"></i> Brooklyn, NY (Brooklyn)</small>
+                        </p>
+                        <p class="mb0 dark-blue">
+                            <span class="fs-xl fw-semibold brand-orange">₦43,000</span>
+                            <small> / per night</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="thumb last-minute-card">
+                    <header class="thumb-header">
+                        <a class="hover-img" href="#">
+                            <img src="assets/img/waldorf-astoria.png" alt="Image Alternative text" title="hotel 1" />
+                            <h5 class="hover-title-center">Book Now</h5>
+                        </a>
+                    </header>
+                    <div class="last-minute-caption">
+                        <ul class="icon-group text-tiny text-color">
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star-half-empty"></i>
+                            </li>
+                        </ul>
+                        <h5 class="thumb-title">
+                            <a class="dark-blue" href="#">Grand Hyatt New York</a>
+                        </h5>
+                        <p class="mb0">
+                            <small>
+                                <i class="fa fa-map-marker"></i> Ozone Park, NY (Kennedy Airport (JFK))</small>
+                        </p>
+                        <p class="mb0 dark-blue">
+                            <span class="fs-xl fw-semibold brand-orange">₦26,000</span>
+                            <small> /per night</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="gap gap-small"></div>
+    </div>
+</div> -->
+<div class="container-fluid bg-white pt-50 pb-50">
+    <div class="container">
+        <h3 class="text-left fw-bold dark-blue mb20">Top Destinations</h3>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="tourbx">
+                    <img src="assets/images/nyc.jpg" alt="newyork city">
+                    <div class="overlay overlay-bl">
+                        <div class="tourbx-details text-white">
+                            <h4 class="thumb-title">New York City</h4>
+                            <a href="#">
+                                <div class="btn btn-orange fs-s">9 Tours <span></span></div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="tourbx">
+                    <img src="assets/images/dubai.jpg" alt="Dubai">
+                    <div class="overlay overlay-dbl">
+                        <div class="tourbx-details text-white">
+                            <h4 class="thumb-title">Dubai</h4>
+                            <a href="#">
+                                <div class="btn btn-orange fs-s">12 Tours <span></span></div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--row-->
+        <div class="row">
+            <div class="col-sm-4 col-md-4">
+                <div class="tourbx">
+                    <img src="assets/images/amsterdam.jpg" alt="Amsterdam">
+                    <div class="overlay overlay-bl">
+                        <div class="tourbx-details text-white">
+                            <h4 class="thumb-title">Amsterdam</h4>
+                            <a href="#">
+                                <div class="btn btn-orange fs-s">4 Tours <span></span></div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4 col-md-4">
+                <div class="tourbx">
+                    <img src="assets/images/london.jpg" alt="London">
+                    <div class="overlay overlay-or">
+                        <div class="tourbx-details text-white">
+                            <h4 class="thumb-title">London</h4>
+                            <a href="#">
+                                <div class="btn btn-orange fs-s">5 Tours <span></span></div>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-sm-4 col-md-4">
+                <div class="tourbx">
+                    <img src="assets/images/safari.jpg" alt="Kenya safari">
+                    <div class="overlay overlay-gr">
+                        <div class="tourbx-details text-white">
+                            <h4 class="thumb-title">Kenya</h4>
+                            <a href="#">
+                                <div class="btn btn-orange fs-s">3 Tours <span></span></div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--row-->
+    </div>
+    <!--container-->
+</div>
+<!--container-fluid-->
+
+<div class="container-fluid bg-flight-illustration pt-20 pb-30">
+    <div class="container ">
+        <div class="row">
+            <div class="gap"></div>
+            <h2 class="text-center text-white fw-semibold">Why NaijaTravelShop?</h2>
+            <div class="gap"></div>
+            <div class="col-md-12">
+
+                <div class="row row-wrap" data-gutter="60">
+                    <div class="col-sm-6 col-md-3">
+                        <div class="thumb text-center thumb-overlay boxeq">
+                            <header class="thumb-header">
+                                <i
+                                    class="fa fa-headphones box-icon-black round box-icon-big animate-icon-top-to-bottom"></i>
+                            </header>
+                            <div class="thumb-caption">
+                                <h5 class="thumb-title pt-10 pb-10">
+                                    <a class="text-title" href="#">247 Support</a>
+                                </h5>
+                                <p class="thumb-desc">We provide end-to-end support to give you your desired travel
+                                    experience. </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="thumb text-center thumb-overlay boxeq">
+                            <header class="thumb-header">
+                                <i class="fa fa-plane box-icon-black round box-icon-big animate-icon-top-to-bottom"></i>
+                            </header>
+                            <div class="thumb-caption">
+                                <h5 class="thumb-title pt-10 pb-10">
+                                    <a class="thumb-title" href="#">Best Travel Deals</a>
+                                </h5>
+                                <p class="thumb-desc">We can always give you the best travel deals you can ever find
+                                    anywhere. You earn points for every flight or hotel you book with us. </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="thumb text-center thumb-overlay boxeq">
+                            <header class="thumb-header">
+                                <i
+                                    class="fa fa-thumbs-o-up box-icon-black round box-icon-big animate-icon-top-to-bottom"></i>
+                            </header>
+                            <div class="thumb-caption">
+                                <h5 class="thumb-title pt-10 pb-10">
+                                    <a class="thumb-title" href="#">Valuable VISA</a>
+                                </h5>
+                                <p class="thumb-desc">We provide valuable visa information and assistance and make your
+                                    visa application process seamless and highly likely to succeed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="thumb text-center thumb-overlay boxeq">
+                            <header class="thumb-header">
+                                <i class="fa fa-send box-icon-black round box-icon-big animate-icon-top-to-bottom"></i>
+                            </header>
+                            <div class="thumb-caption">
+                                <h5 class="thumb-title pt-10 pb-10">
+                                    <a class="thumb-title" href="#">Best Destinations</a>
+                                </h5>
+                                <p class="thumb-desc">We are connected to the most amazing hotels in the world. We can
+                                    completely manage your itinerary including all personal and business travels.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="gap gap-small"></div>
+    </div>
+</div>
+<div class="container-fluid brand-blue-bg  pt-50 pb-40">
+    <div class="container text-white">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <h5 class="fw-bold">
+                    <span class="newsicon"></span>
+                    SUBSCRIBE TO OUR NEWSLETTERS, PROMOS AND BROADCASTS
+                </h5>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <div *ngFor="let alert of alerts">
+                    <alert [type]="alert.type" [dismissOnTimeout]="alert.timeout" (onClosed)="onClosed(alert)">
+                        {{ alert.msg }}</alert>
+                </div>
+                <form class="newsletter" (ngSubmit)="subscribe()" ngNativeValidate>
+                    <input type="email" name="subscribeEmail" placeholder="YOUR EMAIL" class="form-control"
+                        [(ngModel)]="subscribeEmail" required>
+                    <input type="submit" value="Subscribe">
+                    <p class="mt5">
+                        <small>*We Never Send Spam</small>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<ng-template #popTemplate>
+    <div>
+        <p>
+            <span style="color: red" aria-hidden="true">{{travellerAlert}}</span>
+        </p>
+        <table>
+            <tr>
+                <td>Adult (Age 12+)</td>
+                <td>&nbsp;</td>
+                <td>
+                    <button class="btn btn-danger btn-sm round" type="button" disabled *ngIf="adultTraveller == 1"
+                        (click)=" minus('Adult')">
+                        <span aria-hidden="true">&minus;</span>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm round" *ngIf="adultTraveller > 1"
+                        (click)=" minus('Adult')">
+                        <span aria-hidden="true">&minus;</span>
+                    </button>
+                </td>
+                <td>&nbsp;</td>
+                <td>{{adultTraveller}}</td>
+                <td>&nbsp;</td>
+                <td>
+                    <button type="button" class="btn btn-success btn-sm round" (click)=" add('Adult')">
+                        <span aria-hidden="true">+</span>
+                    </button>
+                </td>
+            </tr>
+            <tr>&nbsp;</tr>
+            <tr>
+                <td>Child (Age 2 - 12)</td>
+                <td>&nbsp;</td>
+                <td>
+                    <button class="btn btn-danger btn-sm round" type="button" disabled *ngIf="childTraveller == 0"
+                        (click)=" minus('Child')">
+                        <span aria-hidden="true">&minus;</span>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm round" *ngIf="childTraveller > 0"
+                        (click)=" minus('Child')">
+                        <span aria-hidden="true">&minus;</span>
+                    </button>
+                </td>
+                <td>&nbsp;</td>
+                <td> {{childTraveller}}</td>
+                <td>&nbsp;</td>
+                <td>
+                    <button type="button" class="btn btn-success btn-sm round" (click)=" add('Child')">
+                        <span aria-hidden="true">+</span>
+                    </button>
+                </td>
+            </tr>
+            <tr>&nbsp;</tr>
+            <tr>
+                <td>Infant (below age 2)</td>
+                <td>&nbsp;</td>
+                <td>
+                    <button class="btn btn-danger btn-sm round" type="button" disabled *ngIf="infantTraveller == 0"
+                        (click)=" minus('Infant')">
+                        <span aria-hidden="true">&minus;</span>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm round" *ngIf="infantTraveller > 0"
+                        (click)=" minus('Infant')">
+                        <span aria-hidden="true">&minus;</span>
+                    </button>
+                </td>
+                <td>&nbsp;</td>
+                <td>{{infantTraveller}}</td>
+                <td>&nbsp;</td>
+                <td>
+                    <button type="button" class="btn btn-success btn-sm round" (click)=" add('Infant')">
+                        <span aria-hidden="true">+</span>
+                    </button>
+                </td>
+            </tr>
+            <tr>&nbsp;</tr>
+            <tr>
+                <p text-center>Total Travellers: {{totalTraveller}} </p>
+            </tr>
+        </table>
+    </div>
+</ng-template>
+<div *ngIf="isModalShown" [config]="{ show: true}" (onHidden)="onHidden()" bsModal #autoShownModal="bs-modal"
+    class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>
+                    <button type="button" class="close pull-right" aria-label="Close" (click)="hideModal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </p>
+                <p class="mb30" style="color: red">No results retrieved, Please try again</p>
+            </div>
+        </div>
+    </div>
+</div>
+<ng-template #multiTrip>
+    <div class="modal-container multitripmod">
+        <!-- <div class="modal-dialog modal-lg"> -->
+        <div class="  modal-content" style="width: 160%;">
+            <div class="modal-body">
+                <button type="button" class="close pull-right" aria-label="Close" (click)="modalMultiTrip.hide()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5>MultiTrip Search</h5>
+                        <form autocomplete="off" (ngSubmit)="searchFlight('3')" ngNativeValidate>
+                            <div class="row" *ngFor="let u of multipleDest; let i = index">
+                                <div class="col-md-4">
+                                    <div class="form-group form-group-lg form-group-icon-left">
+                                        <i class="fa fa-plane input-icon"></i>
+                                        <label>Flying from</label>
+                                        <input ngModel name="departureCity{{i}}" [typeahead]="airports"
+                                            (keypress)="checkForAirportList('Departure')"
+                                            (typeaheadOnSelect)="typeaheadOnSelectM($event, 'Departure', i)"
+                                            [typeaheadOptionsLimit]="7" typeaheadOptionField="displayName"
+                                            placeholder="Enter name of city or airport" class="typeahead form-control"
+                                            autocomplete="off" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group form-group-lg form-group-icon-left">
+                                        <i class="fa fa-plane fa-flip-vertical input-icon"></i>
+                                        <label>Flying to</label>
+                                        <input type="text" class="typeahead form-control" ngModel
+                                            name="destinationCity{{i}}" placeholder="Enter name of city or airport"
+                                            [typeahead]="airports" (keypress)="checkForAirportList('Destination')"
+                                            (typeaheadOnSelect)="typeaheadOnSelectM($event, 'Destination', i)"
+                                            [typeaheadOptionsLimit]="7" autocomplete="off"
+                                            typeaheadOptionField="displayName" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group form-group-lg form-group-icon-left">
+                                        <i class="fa fa-calendar input-icon input-icon-highlight"></i>
+                                        <label>Departure</label>
+                                        <input type="text" class="date-pick form-control" name="u.departureDate"
+                                            placeholder="Departure date" [maxDate]="maxDepartureDate"
+                                            [minDate]="minDepartureDate" autocomplete="off"
+                                            [bsConfig]="{dateInputFormat: 'ddd Do MMM, YYYY', containerClass: 'theme-orange', showWeekNumbers:false}"
+                                            required [(ngModel)]="u.departureDate" bsDatepicker>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div>
+                                        <label class="control-label"> &nbsp; </label>
+                                        <button type="button" class="btn btn-success btn-sm"
+                                            *ngIf="i == 0 && multipleDest.length < 4" (click)="addDestination()">
+                                            <span aria-hidden="true">+ Add</span>
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                            *ngIf="i + 1 == multipleDest.length && i != 1"
+                                            (click)="removeDestination()">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group form-group-lg form-group-icon-left">
+                                        <label>No. of Passengers</label>
+                                        <input type="text" class="form-control" [outsideClick]="true"
+                                            [popover]="popTemplate" name="totalTravellers" id="totalTravellers" required
+                                            [value]="getTotalTraveller()">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group form-group-lg form-group-icon-left">
+                                        <label>Seat Class</label>
+                                        <select class="form-control" name="seatclass" id="seatclass"
+                                            [(ngModel)]="seatclass" required>
+                                            <option value="1">Economy</option>
+                                            <option value="3">Business</option>
+                                            <option value="4">First Class</option>
+                                            <option value="2">Premium</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-lg" type="submit">Search for
+                                Flights</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- </div> -->
+    </div>
+</ng-template>

@@ -1,0 +1,279 @@
+<div class="breadcrumb-wrap">
+    <div class="container">
+        <ul class="breadcrumb">
+            <li>
+                <a href="#">Home</a>
+            </li>
+            <li>
+                <a routerLink='/hotel_search_result'>Hotel Search Result</a>
+            </li>
+            <li>
+                <a routerLink='/app-hotel-rooms'>Hotel Detail</a>
+            </li>
+            <li class="active">
+                Hotel Booking
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="gap"></div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-7 col-md-8">
+            <h3>Hotel Booking</h3>
+            <form class="boxed-form" (ngSubmit)="proceed()" ngNativeValidate>
+                <header>Customer Account</header>
+                <div class="boxed-form-contents">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Title<span style="color: red">*</span></label>
+                                <select class="form-control" name="title" [(ngModel)]="contactDetail.title" required>
+                                    <option value="Mr">Mr</option>
+                                    <option value="Mrs">Mrs</option>
+                                    <option value="Miss">Miss</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>First name<span style="color: red">*</span></label>
+                                <input [(ngModel)]="contactDetail.firstName" type="text" name="firstName"
+                                    class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Last name<span style="color: red">*</span></label>
+                                <input [(ngModel)]="contactDetail.lastName" type="text" name="lastName"
+                                    class="form-control" required />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Email<span style="color: red">*</span></label>
+                                <input [(ngModel)]="contactDetail.email" type="email" name="email" class="form-control"
+                                    required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Phone number<span style="color: red">*</span></label>
+                                <input [(ngModel)]="contactDetail.phoneNumber" type="tel" name="phoneNumber"
+                                    class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Nationality<span style="color: red">*</span></label>
+                                <select class="form-control" name="country" [(ngModel)]="contactDetail.countryName"
+                                    required>
+                                    <option *ngFor="let c of countries">{{c.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div *ngIf="!login" class="checkbox">
+                        <label>
+                            <input class="i-check" name="shouldRegister" type="checkbox" [(ngModel)]="shouldRegister"
+                                checked />Create user account
+                        </label>
+                    </div>
+                    <div *ngIf="shouldRegister" class="form-group form-group-icon-left">
+                        <i class="fa fa-lock input-icon"></i>
+                        <label>Password<span style="color: red">*</span></label>
+                        <input class="form-control" type="password" placeholder="your password" name="password"
+                            [(ngModel)]="contactDetail.password" required />
+                    </div>
+                </div>
+
+                <div class="gap gap-small"></div>
+                <div class="boxed-form">
+                    <header>Guest Information</header>
+                    <div class="boxed-form-contents">
+                        <ul class="list">
+                            <li *ngFor="let u of roomDetailLists; let i = index">
+                                <h5 style="text-align: center">Room {{i + 1}}</h5>
+                                <div class="row" *ngFor="let v of u.adultList; let j = index">
+                                    <h6 style="text-align: center">
+                                        <strong>Adult {{j + 1}}</strong>
+                                        <small *ngIf="j == 0 && i == 0" (click)="setAdultContact()"
+                                            style="cursor:pointer; color: orange">
+                                            Same as customer account?
+                                        </small>
+                                    </h6>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Title<span style="color: red">*</span></label>
+                                            <select class="form-control" name="titlea{{i}}{{j}}"
+                                                [(ngModel)]="roomDetailLists[i].adultList[j].title" required>
+                                                <option value="Mr">Mr</option>
+                                                <option value="Mrs">Mrs</option>
+                                                <option value="Miss">Miss</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>First name<span style="color: red">*</span></label>
+                                            <input [(ngModel)]="roomDetailLists[i].adultList[j].firstName" type="text"
+                                                name="firstNamea{{i}}{{j}}" class="form-control" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Last name<span style="color: red">*</span></label>
+                                            <input [(ngModel)]="roomDetailLists[i].adultList[j].lastName" type="text"
+                                                name="lastNamea{{i}}{{j}}" class="form-control" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Nationality<span style="color: red">*</span></label>
+                                            <select class="form-control" name="countrya{{i}}{{j}}"
+                                                [(ngModel)]="roomDetailLists[i].adultList[j].countryName" required>
+                                                <option *ngFor="let c of countries">{{c.name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" *ngFor="let v of u.childrenList; let l = index">
+                                    <h6 style="text-align: center">
+                                        <strong>Child {{l + 1}}</strong>
+                                    </h6>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Title<span style="color: red">*</span></label>
+                                            <select class="form-control" name="titlec{{i}}{{l}}"
+                                                [(ngModel)]="roomDetailLists[i].childrenList[l].title" required>
+                                                <option value="2">Master</option>
+                                                <option value="1">Miss</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>First name<span style="color: red">*</span></label>
+                                            <input [(ngModel)]="roomDetailLists[i].childrenList[l].firstName"
+                                                type="text" name="firstNamec{{i}}{{l}}" class="form-control" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Last name<span style="color: red">*</span></label>
+                                            <input [(ngModel)]="roomDetailLists[i].childrenList[l].lastName" type="text"
+                                                name="lastNamec{{i}}{{l}}" class="form-control" required />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Nationality<span style="color: red">*</span></label>
+                                            <select class="form-control" name="countryc{{i}}{{l}}"
+                                                [(ngModel)]="roomDetailLists[i].childrenList[l].countryName" required>
+                                                <option *ngFor="let c of countries">{{c.name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="boxed-form">
+                    <div class="boxed-form-contents">
+                        <small>
+                            <p>After Clicking on 'Proceed to Checkout', you will be shown a payment page where you can
+                                complete
+                                the
+                                payment
+                            </p>
+                        </small>
+                        <button type="submit" class="btn btn-primary btn-lg">Proceed to Checkout</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-4 col-sm-5">
+            <div class="booking-item-payment">
+                <header class="clearfix">
+                    <span class="booking-item-payment-img">
+                        <img src="{{hotel.thumbImageURL}}" alt="Image Alternative text" title="hotel 1">
+                    </span>
+                    <h5 class="booking-item-payment-title">{{hotel.hotelName}}</h5>
+                    <ul class="icon-group booking-item-rating-stars">
+                        <rating [(ngModel)]="hotel.rating" [max]="5" [readonly]="true"></rating>
+                    </ul>
+                </header>
+                <ul class="booking-item-payment-details">
+                    <li>
+                        <h5>Booking for {{nights}} nights</h5>
+                        <div class="booking-item-payment-date">
+                            <p class="booking-item-payment-date-day">{{formatDate3(hotelSearch.checkInDate)}}</p>
+                            <p class="booking-item-payment-date-weekday">{{formatDate2(hotelSearch.checkInDate)}}</p>
+                        </div>
+                        <i class="fa fa-arrow-right booking-item-payment-date-separator"></i>
+                        <div class="booking-item-payment-date">
+                            <p class="booking-item-payment-date-day">{{formatDate3(hotelSearch.checkOutDate)}}</p>
+                            <p class="booking-item-payment-date-weekday">{{formatDate2(hotelSearch.checkOutDate)}}</p>
+                        </div>
+                    </li>
+                    <div class="row details-divider-hotels">
+                        <div class="col-md-12">
+                            <h5>{{room.name}}</h5>
+                        </div>
+                    </div>
+                    <li>
+                        <ul class="booking-item-payment-price">
+                            <div class="row">
+                                <li class="col-md-12">
+                                    <div class="col-md-4 pl0">
+                                        <p class="booking-item-payment-price-title">{{nights}} Nights</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="booking-item-payment-price-seperator">-------------</p>
+                                    </div>
+                                    <div class="col-md-4 pr0 text-right">
+                                        <p class="booking-item-payment-price-amount">
+                                            &#8358;{{formatCurrency(room.roomPrice / nights) | number}}
+                                            <small>* {{nights}}</small>
+                                        </p>
+                                    </div>
+                                </li>
+                            </div>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="row">
+                    <div class="col-md-12">
+                        <span class="col-md-6 booking-item-payment-total">Total Amount:</span>
+                        <span
+                            class="col-md-6 total-payable-amount">&#8358;{{formatCurrency(room.roomPrice) | number}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="gap"></div>
+</div>
+<div *ngIf="isModalShown" [config]="{ show: true}" (onHidden)="onHidden()" bsModal #autoShownModal="bs-modal"
+    class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>
+                    <button type="button" class="close pull-right" aria-label="Close" (click)="hideModal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </p>
+
+                <p class="mb30" style="color: red; text-align: center" text-center>{{alertMessage}}</p>
+            </div>
+        </div>
+    </div>
+</div>
