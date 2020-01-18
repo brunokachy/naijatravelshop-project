@@ -7,7 +7,7 @@ import { LocalAPIService } from '../../provider/local.api.service';
     moduleId: module.id,
     selector: 'user_management',
     templateUrl: 'user-management.component.html',
-    styleUrls: ['user-management.component.scss']
+    styleUrls: []
 })
 export class UserManagementComponent {
 

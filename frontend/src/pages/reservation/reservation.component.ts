@@ -8,7 +8,7 @@ import { User } from '../../model/user';
     moduleId: module.id,
     selector: 'reservation',
     templateUrl: 'reservation.component.html',
-    styleUrls: ['reservation.component.scss']
+    styleUrls: []
 })
 export class ReservationComponent {
 

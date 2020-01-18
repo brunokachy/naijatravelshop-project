@@ -9,7 +9,7 @@ import { LocalAPIService } from '../../provider/local.api.service';
     moduleId: module.id,
     selector: 'register',
     templateUrl: 'register.component.html',
-    styleUrls: ['register.component.scss']
+    styleUrls: []
 })
 export class RegisterComponent {
 

@@ -14,7 +14,7 @@ import { LocalAPIService } from '../../provider/local.api.service';
     moduleId: module.id,
     selector: 'hotel_search_result',
     templateUrl: 'hotel-search-result.component.html',
-    styleUrls: ['hotel-search-result.component.scss']
+    styleUrls: []
 })
 export class HotelSearchResultComponent {
     hotels: Hotels;

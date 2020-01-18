@@ -31,7 +31,6 @@ import com.naijatravelshop.persistence.repository.crm.ServiceRequestRepository;
 import com.naijatravelshop.persistence.repository.flight.AirportRepository;
 import com.naijatravelshop.persistence.repository.flight.FlightCityRepository;
 import com.naijatravelshop.persistence.repository.flight.FlightRouteRepository;
-import com.naijatravelshop.persistence.repository.visa.VisaRequestRepository;
 import com.naijatravelshop.persistence.repository.hotel.HotelBookingDetailRepository;
 import com.naijatravelshop.persistence.repository.hotel.HotelCityRepository;
 import com.naijatravelshop.persistence.repository.hotel.RoomOfferRepository;
@@ -43,6 +42,7 @@ import com.naijatravelshop.persistence.repository.portal.ReservationOwnerReposit
 import com.naijatravelshop.persistence.repository.portal.ReservationRepository;
 import com.naijatravelshop.persistence.repository.portal.SettingRepository;
 import com.naijatravelshop.persistence.repository.portal.TravellerRepository;
+import com.naijatravelshop.persistence.repository.visa.VisaRequestRepository;
 import com.naijatravelshop.service.email.EmailService;
 import com.naijatravelshop.service.flight.pojo.request.TravellerDTO;
 import com.naijatravelshop.service.flight.pojo.response.ReservationResponseDTO;
@@ -65,6 +65,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -196,7 +197,9 @@ public class HotelServiceImpl implements HotelService {
                 images = hotel.getImages().getHotelImages().getImage().stream().map(image -> image.getUrl()).collect(Collectors.toList());
             }
 
-            for (RoomType roomType : hotel.getRooms().get(0).getRoomType()) {
+            List<RoomType> type = hotel.getRooms().get(0).getRoomType();
+            for (int i1 = 0, typeSize = type.size(); i1 < typeSize; i1++) {
+                RoomType roomType = type.get(i1);
                 Double roomPrice = Double.valueOf(roomType.getRateBasis().get(0).getTotal()) * exchangeRate;
                 roomPrices.add(roomPrice);
                 RoomResponse roomResponse = RoomResponse
@@ -248,110 +251,26 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public ReservationResponseDTO createReservation(BookHotelDTO bookHotelDTO) {
         try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            ReservationOwner owner = new ReservationOwner();
-            Optional<Country> optionalCountry = countryRepository.findFirstByName(bookHotelDTO.getCustomerAccount().getCountryName());
-            Optional<HotelCity> optionalHotelCity = hotelCityRepository.findFirstByCode(bookHotelDTO.getCityCode());
+            ReservationOwner owner = createReservationOwner(bookHotelDTO);
 
-            owner.setFirstName(bookHotelDTO.getCustomerAccount().getFirstName());
-            owner.setLastName(bookHotelDTO.getCustomerAccount().getLastName());
-            owner.setEmail(bookHotelDTO.getCustomerAccount().getEmail());
-            owner.setPhoneNumber(bookHotelDTO.getCustomerAccount().getPhoneNumber());
-            owner.setNationality(optionalCountry.orElse(null));
-            owner.setTitle(bookHotelDTO.getCustomerAccount().getTitle());
-            reservationOwnerRepository.save(owner);
+            HotelBookingDetail hotelBookingDetail = createHotelBookingDetail(bookHotelDTO);
 
-            HotelBookingDetail hotelBookingDetail = new HotelBookingDetail();
-            hotelBookingDetail.setCheckoutDate(new Timestamp(simpleDateFormat.parse(bookHotelDTO.getCheckOutDate()).getTime()));
-            hotelBookingDetail.setNumberOfChildren(bookHotelDTO.getChildCount());
-            hotelBookingDetail.setNumberOfAdult(bookHotelDTO.getAdultCount());
-            hotelBookingDetail.setNightlyRateTotalInKobo(bookHotelDTO.getRoomPrice() * 100L);
-            hotelBookingDetail.setCheckinDate(new Timestamp(simpleDateFormat.parse(bookHotelDTO.getCheckInDate()).getTime()));
-            hotelBookingDetail.setCity(optionalHotelCity.orElse(null));
-            hotelBookingDetail.setCityName(bookHotelDTO.getCityName());
-            hotelBookingDetail.setCountryCode(bookHotelDTO.getCountryCode());
-            hotelBookingDetail.setCountryName(bookHotelDTO.getCountryName());
-            hotelBookingDetail.setHotelDescription(bookHotelDTO.getHotelDescription());
-            hotelBookingDetail.setHotelId(bookHotelDTO.getHotelId());
-            hotelBookingDetail.setHotelName(bookHotelDTO.getHotelName());
-            hotelBookingDetail.setNumberOfNightsStay(bookHotelDTO.getNights());
-            hotelBookingDetail.setNumberOfRoom(bookHotelDTO.getRoomCount());
-            hotelBookingDetail.setRoomType(bookHotelDTO.getRoomName());
-            hotelBookingDetail.setStatus(EntityStatus.ACTIVE);
+            Reservation reservation = persistReservation(owner, bookHotelDTO, hotelBookingDetail);
 
-            hotelBookingDetailRepository.save(hotelBookingDetail);
+            List<RoomDTO> guestInformation = bookHotelDTO.getGuestInformation();
+            for (int i = 0, guestInformationSize = guestInformation.size(); i < guestInformationSize; i++) {
+                RoomDTO roomDTO = guestInformation.get(i);
 
-            Reservation reservation = new Reservation();
-            reservation.setSellingPrice(bookHotelDTO.getRoomPrice() * 100L);
-            reservation.setActualAmountInKobo(bookHotelDTO.getRoomPrice() * 100L);
-            reservation.setBookingNumber(RandomStringUtils.randomAlphabetic(6).toUpperCase());
-            reservation.setReservationOwner(owner);
-            reservation.setStatus(EntityStatus.ACTIVE);
-            reservation.setTransactionFeeInKobo(0L);
-            reservation.setSupplierGroupType(SupplierGroupType.DOTW);
-            reservation.setMargin(0L);
-            reservation.setReservationStatus(ProcessStatus.PENDING);
-            reservation.setReservationType(ReservationType.HOTEL);
-            reservation.setHotelBookingDetail(hotelBookingDetail);
-            if (bookHotelDTO.getPortalUsername() != null) {
-                Optional<PortalUser> optionalPortalUser = portalUserRepository.findFirstByEmailAndStatus(bookHotelDTO.getPortalUsername(), EntityStatus.ACTIVE);
-                reservation.setProcessedBy(optionalPortalUser.get());
-            }
-            reservationRepository.save(reservation);
+                RoomOffer roomOffer = createRoomOffer(hotelBookingDetail, roomDTO);
 
-            for (RoomDTO roomDTO : bookHotelDTO.getGuestInformation()) {
-                RoomOffer roomOffer = new RoomOffer();
-                roomOffer.setHotelBookingDetail(hotelBookingDetail);
-                roomOffer.setNumberOfAdults(roomDTO.getNumberOfAdults());
-                roomOffer.setNumberOfChildren(roomDTO.getNumberOfChildren());
+                createTraveller(roomDTO.getAdultList(), reservation, roomOffer);
 
-                roomOfferRepository.save(roomOffer);
-
-                for (TravellerDTO traveller : roomDTO.getAdultList()) {
-                    Traveller t = new Traveller();
-                    t.setAge(traveller.getAge());
-                    t.setFirstName(traveller.getFirstName());
-                    t.setLastName(traveller.getLastName());
-                    t.setTitle(traveller.getTitle());
-                    t.setRoomOffer(roomOffer);
-                    t.setReservation(reservation);
-                    t.setNationality(traveller.getCountryName());
-
-                    if (traveller.getTitle().equalsIgnoreCase("MISS")
-                            || traveller.getTitle().equalsIgnoreCase("MRS")) {
-                        t.setGender(Gender.FEMALE);
-                    } else {
-                        t.setGender(Gender.MALE);
-                    }
-                    travellerRepository.save(t);
-                }
-                for (TravellerDTO traveller : roomDTO.getChildrenList()) {
-                    Traveller t = new Traveller();
-                    t.setAge(traveller.getAge());
-                    t.setFirstName(traveller.getFirstName());
-                    t.setLastName(traveller.getLastName());
-                    t.setTitle(traveller.getTitle());
-                    t.setRoomOffer(roomOffer);
-                    t.setReservation(reservation);
-                    t.setNationality(traveller.getCountryName());
-
-                    if (traveller.getTitle().equalsIgnoreCase("MISS")) {
-                        t.setGender(Gender.FEMALE);
-                    } else {
-                        t.setGender(Gender.MALE);
-                    }
-                    travellerRepository.save(t);
-                }
+                createTraveller(roomDTO.getChildrenList(), reservation, roomOffer);
             }
 
-            try {
-                createHotelServiceRequest(reservation, owner, bookHotelDTO);
-                HotelReservationResponse hotelReservationResponse = prepareEmailMessage(reservation, bookHotelDTO.getGuestInformation());
-                sendHotelBookingEmail(hotelReservationResponse);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                e.printStackTrace();
-            }
+            createHotelServiceRequest(reservation, owner);
+            HotelReservationResponse hotelReservationResponse = prepareEmailMessage(reservation, bookHotelDTO.getGuestInformation());
+            sendHotelBookingEmail(hotelReservationResponse);
 
             ReservationResponseDTO responseDTO = new ReservationResponseDTO();
             responseDTO.setBookingNumber(reservation.getBookingNumber());
@@ -364,14 +283,102 @@ public class HotelServiceImpl implements HotelService {
         }
     }
 
-    @Transactional
-    public void createHotelServiceRequest(Reservation reservation, ReservationOwner reservationOwner, BookHotelDTO bookHotelDTO) {
+    private ReservationOwner createReservationOwner(BookHotelDTO bookHotelDTO) {
+        ReservationOwner owner = new ReservationOwner();
+        Optional<Country> optionalCountry = countryRepository.findFirstByName(bookHotelDTO.getCustomerAccount().getCountryName());
+
+        owner.setFirstName(bookHotelDTO.getCustomerAccount().getFirstName());
+        owner.setLastName(bookHotelDTO.getCustomerAccount().getLastName());
+        owner.setEmail(bookHotelDTO.getCustomerAccount().getEmail());
+        owner.setPhoneNumber(bookHotelDTO.getCustomerAccount().getPhoneNumber());
+        owner.setNationality(optionalCountry.orElse(null));
+        owner.setTitle(bookHotelDTO.getCustomerAccount().getTitle());
+        return reservationOwnerRepository.save(owner);
+    }
+
+    private HotelBookingDetail createHotelBookingDetail(BookHotelDTO bookHotelDTO) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Optional<HotelCity> optionalHotelCity = hotelCityRepository.findFirstByCode(bookHotelDTO.getCityCode());
+
+        HotelBookingDetail hotelBookingDetail = new HotelBookingDetail();
+        hotelBookingDetail.setCheckoutDate(new Timestamp(simpleDateFormat.parse(bookHotelDTO.getCheckOutDate()).getTime()));
+        hotelBookingDetail.setNumberOfChildren(bookHotelDTO.getChildCount());
+        hotelBookingDetail.setNumberOfAdult(bookHotelDTO.getAdultCount());
+        hotelBookingDetail.setNightlyRateTotalInKobo(bookHotelDTO.getRoomPrice() * 100L);
+        hotelBookingDetail.setCheckinDate(new Timestamp(simpleDateFormat.parse(bookHotelDTO.getCheckInDate()).getTime()));
+        hotelBookingDetail.setCity(optionalHotelCity.orElse(null));
+        hotelBookingDetail.setCityName(bookHotelDTO.getCityName());
+        hotelBookingDetail.setCountryCode(bookHotelDTO.getCountryCode());
+        hotelBookingDetail.setCountryName(bookHotelDTO.getCountryName());
+        hotelBookingDetail.setHotelDescription(bookHotelDTO.getHotelDescription());
+        hotelBookingDetail.setHotelId(bookHotelDTO.getHotelId());
+        hotelBookingDetail.setHotelName(bookHotelDTO.getHotelName());
+        hotelBookingDetail.setNumberOfNightsStay(bookHotelDTO.getNights());
+        hotelBookingDetail.setNumberOfRoom(bookHotelDTO.getRoomCount());
+        hotelBookingDetail.setRoomType(bookHotelDTO.getRoomName());
+        hotelBookingDetail.setStatus(EntityStatus.ACTIVE);
+
+        return hotelBookingDetailRepository.save(hotelBookingDetail);
+    }
+
+    private Reservation persistReservation(ReservationOwner reservationOwner, BookHotelDTO bookHotelDTO,
+                                           HotelBookingDetail hotelBookingDetail) {
+        Reservation reservation = new Reservation();
+        reservation.setSellingPrice(bookHotelDTO.getRoomPrice() * 100L);
+        reservation.setActualAmountInKobo(bookHotelDTO.getRoomPrice() * 100L);
+        reservation.setBookingNumber(RandomStringUtils.randomAlphabetic(6).toUpperCase());
+        reservation.setReservationOwner(reservationOwner);
+        reservation.setStatus(EntityStatus.ACTIVE);
+        reservation.setTransactionFeeInKobo(0L);
+        reservation.setSupplierGroupType(SupplierGroupType.DOTW);
+        reservation.setMargin(0L);
+        reservation.setReservationStatus(ProcessStatus.PENDING);
+        reservation.setReservationType(ReservationType.HOTEL);
+        reservation.setHotelBookingDetail(hotelBookingDetail);
+        if (bookHotelDTO.getPortalUsername() != null) {
+            Optional<PortalUser> optionalPortalUser = portalUserRepository.findFirstByEmailAndStatus(bookHotelDTO.getPortalUsername(), EntityStatus.ACTIVE);
+            reservation.setProcessedBy(optionalPortalUser.get());
+        }
+        return reservationRepository.save(reservation);
+    }
+
+    private RoomOffer createRoomOffer(HotelBookingDetail hotelBookingDetail, RoomDTO roomDTO) {
+        RoomOffer roomOffer = new RoomOffer();
+        roomOffer.setHotelBookingDetail(hotelBookingDetail);
+        roomOffer.setNumberOfAdults(roomDTO.getNumberOfAdults());
+        roomOffer.setNumberOfChildren(roomDTO.getNumberOfChildren());
+
+        return roomOfferRepository.save(roomOffer);
+    }
+
+    private void createTraveller(List<TravellerDTO> travellerDTOS, Reservation reservation, RoomOffer roomOffer) {
+        for (int i = 0, travellerDTOSSize = travellerDTOS.size(); i < travellerDTOSSize; i++) {
+            TravellerDTO travellerDTO = travellerDTOS.get(i);
+            Traveller traveller = new Traveller();
+            traveller.setAge(traveller.getAge());
+            traveller.setFirstName(traveller.getFirstName());
+            traveller.setLastName(traveller.getLastName());
+            traveller.setTitle(traveller.getTitle());
+            traveller.setRoomOffer(roomOffer);
+            traveller.setReservation(reservation);
+            traveller.setNationality(travellerDTO.getCountryName());
+
+            if (traveller.getTitle().equalsIgnoreCase("MISS")
+                    || traveller.getTitle().equalsIgnoreCase("MRS")) {
+                traveller.setGender(Gender.FEMALE);
+            } else {
+                traveller.setGender(Gender.MALE);
+            }
+            travellerRepository.save(traveller);
+        }
+    }
+
+    private Customer createCustomer(ReservationOwner reservationOwner) {
         Optional<Customer> optionalCustomer = customerRepository.findCustomerByEmail(reservationOwner.getEmail());
-        Customer customer;
         if (optionalCustomer.isPresent()) {
-            customer = optionalCustomer.get();
+            return optionalCustomer.get();
         } else {
-            customer = new Customer();
+            Customer customer = new Customer();
             customer.setEmail(reservationOwner.getEmail());
             customer.setFirstName(reservationOwner.getFirstName());
             customer.setLastName(reservationOwner.getLastName());
@@ -379,9 +386,11 @@ public class HotelServiceImpl implements HotelService {
             customer.setStatus(EntityStatus.ACTIVE);
             customer.setDateOfBirth(reservationOwner.getDateOfBirth());
             customer.setTitle(reservationOwner.getTitle());
-            customerRepository.save(customer);
+            return customerRepository.save(customer);
         }
+    }
 
+    private ServiceRequest createServiceRequest(Reservation reservation, Customer customer) {
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setAssignedTo(reservation.getProcessedBy());
         serviceRequest.setCustomer(customer);
@@ -390,22 +399,36 @@ public class HotelServiceImpl implements HotelService {
         serviceRequest.setRequestId(RandomStringUtils.randomAlphabetic(6));
         serviceRequest.setServiceType(ReservationType.HOTEL);
         serviceRequest.setStatus(EntityStatus.ACTIVE);
-        serviceRequestRepository.save(serviceRequest);
+        return serviceRequestRepository.save(serviceRequest);
+    }
+
+    private ServiceRequestActorHistory createServiceRequestActorHistory(ServiceRequest serviceRequest, Reservation reservation) {
+        ServiceRequestActorHistory actorHistory = new ServiceRequestActorHistory();
+        actorHistory.setActor(reservation.getProcessedBy());
+        actorHistory.setServiceRequest(serviceRequest);
+        actorHistory.setStatus(EntityStatus.ACTIVE);
+        return serviceRequestActorHistoryRepository.save(actorHistory);
+    }
+
+    private void createServiceRequestLog(ServiceRequestActorHistory actorHistory) {
+        ServiceRequestLog serviceRequestLog = new ServiceRequestLog();
+        serviceRequestLog.setActor(actorHistory);
+        serviceRequestLog.setDescription(ServiceTaskType.NEW_TASK.getValue());
+        serviceRequestLog.setSubject(ServiceTaskSubject.HOTEL_ENQUIRY);
+        serviceRequestLog.setTaskType(ServiceTaskType.NEW_TASK);
+        serviceRequestLog.setStatus(EntityStatus.ACTIVE);
+        serviceRequestLogRepository.save(serviceRequestLog);
+    }
+
+    private void createHotelServiceRequest(Reservation reservation, ReservationOwner reservationOwner) {
+        Customer customer = createCustomer(reservationOwner);
+
+        ServiceRequest serviceRequest = createServiceRequest(reservation, customer);
 
         if (reservation.getProcessedBy() != null) {
-            ServiceRequestActorHistory actorHistory = new ServiceRequestActorHistory();
-            actorHistory.setActor(reservation.getProcessedBy());
-            actorHistory.setServiceRequest(serviceRequest);
-            actorHistory.setStatus(EntityStatus.ACTIVE);
-            serviceRequestActorHistoryRepository.save(actorHistory);
+            ServiceRequestActorHistory actorHistory = createServiceRequestActorHistory(serviceRequest, reservation);
 
-            ServiceRequestLog serviceRequestLog = new ServiceRequestLog();
-            serviceRequestLog.setActor(actorHistory);
-            serviceRequestLog.setDescription(ServiceTaskType.NEW_TASK.getValue());
-            serviceRequestLog.setSubject(ServiceTaskSubject.HOTEL_ENQUIRY);
-            serviceRequestLog.setTaskType(ServiceTaskType.NEW_TASK);
-            serviceRequestLog.setStatus(EntityStatus.ACTIVE);
-            serviceRequestLogRepository.save(serviceRequestLog);
+            createServiceRequestLog(actorHistory);
         }
     }
 

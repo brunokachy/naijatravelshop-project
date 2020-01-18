@@ -14,7 +14,7 @@ declare var getpaidSetup;
     moduleId: module.id,
     selector: 'flight_payment',
     templateUrl: 'flight-payment.component.html',
-    styleUrls: ['flight-payment.component.scss']
+    styleUrls: []
 })
 export class FlightPaymentComponent {
     pricedItinerary: PricedItineraries;

@@ -6,7 +6,7 @@ import { LocalAPIService } from '../../provider/local.api.service';
     moduleId: module.id,
     selector: 'dashboard',
     templateUrl: 'dashboard.component.html',
-    styleUrls: ['dashboard.component.scss']
+    styleUrls: []
 })
 export class DashboardComponent {
     user: User;

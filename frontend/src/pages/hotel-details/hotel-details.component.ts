@@ -15,7 +15,7 @@ import { HotelBooking } from '../../model/HotelBooking';
     moduleId: module.id,
     selector: 'hotel_details',
     templateUrl: 'hotel-details.component.html',
-    styleUrls: ['hotel-details.component.scss']
+    styleUrls: []
 })
 export class HotelDetailsComponent {
     hotel: HotelList;

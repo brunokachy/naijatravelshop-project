@@ -12,7 +12,7 @@ import { Country } from '../../model/Country';
     moduleId: module.id,
     selector: 'settings',
     templateUrl: 'settings.component.html',
-    styleUrls: ['settings.component.scss']
+    styleUrls: []
 })
 export class SettingsComponent {
     constructor(private localAPIService: LocalAPIService) {

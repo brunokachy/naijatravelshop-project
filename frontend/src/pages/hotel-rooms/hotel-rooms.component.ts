@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
     moduleId: module.id,
     selector: 'app-hotel-rooms',
     templateUrl: 'hotel-rooms.component.html',
-    styleUrls: ['hotel-rooms.component.scss']
+    styleUrls: []
 })
 export class HotelRoomsComponent {
     hotel: HotelList;

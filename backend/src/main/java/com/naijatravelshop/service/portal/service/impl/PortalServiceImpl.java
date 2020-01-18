@@ -102,7 +102,6 @@ public class PortalServiceImpl implements PortalService {
 
     private static final Logger log = LoggerFactory.getLogger(PortalServiceImpl.class);
 
-
     public PortalServiceImpl(PortalUserRepository portalUserRepository,
                              PasswordEncoder passwordEncoder,
                              PortalUserRoleMapRepository portalUserRoleMapRepository,
@@ -136,13 +135,10 @@ public class PortalServiceImpl implements PortalService {
         this.countryRepository = countryRepository;
     }
 
-
     @Override
     @Transactional
     public UserResponse createUserAccount(UserDTO userDTO) {
-        Optional<PortalUser> optionalPortalUser;
-
-        optionalPortalUser = portalUserRepository.findFirstByEmailAndStatus(userDTO.getEmail(), EntityStatus.ACTIVE);
+        Optional<PortalUser> optionalPortalUser = portalUserRepository.findFirstByEmailAndStatus(userDTO.getEmail(), EntityStatus.ACTIVE);
         if (optionalPortalUser.isPresent()) {
             throw new BadRequestException("User account already exists");
         }
@@ -162,73 +158,41 @@ public class PortalServiceImpl implements PortalService {
         user.setLastPasswordUpdate(currentTime);
         portalUserRepository.save(user);
 
-        for (String role : userDTO.getRoles()) {
-            Optional<Role> optionalRole = roleRepository.findFirstByDisplayName(role);
+        userDTO.getRoles().stream().map(role -> roleRepository.findFirstByDisplayName(role)).forEachOrdered(optionalRole -> {
             PortalUserRoleMap portalUserRoleMap = new PortalUserRoleMap();
             portalUserRoleMap.setPortalUser(user);
             portalUserRoleMap.setRole(optionalRole.get());
             portalUserRoleMap.setStatus(EntityStatus.ACTIVE);
             portalUserRoleMapRepository.save(portalUserRoleMap);
-        }
-
-
-        UserResponse userResponse = new UserResponse();
-        userResponse.setEmail(user.getEmail());
-        userResponse.setFirstName(user.getFirstName());
-        userResponse.setLastName(user.getLastName());
-        userResponse.setId(user.getId());
-        userResponse.setPhoneNumber(user.getPhoneNumber());
-        userResponse.setRoles(userDTO.getRoles());
+        });
 
         Map<String, Object> newAccount = new HashMap<>();
         newAccount.put("recieverName", user.getFirstName());
         emailService.sendHtmlEmail(user.getEmail(), "Naija Travel Shop: New User Account!", "account-creation-template", newAccount, "travel@naijatravelshop.com");
 
-        return userResponse;
+        return buildUserResponse(user, userDTO);
     }
 
     @Override
-    @Transactional
     public UserResponse updateUserAccount(UserDTO userDTO) {
-        Optional<PortalUser> optionalPortalUser = portalUserRepository.findById(userDTO.getId());
-
-        if (!optionalPortalUser.isPresent()) {
-            throw new NotFoundException("User does not exist");
-        }
-
-        Timestamp currentTime = new Timestamp(new Date().getTime());
-        PortalUser user = optionalPortalUser.get();
+        PortalUser user = doesUserExist(userDTO);
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setPhoneNumber(userDTO.getPhoneNumber());
-        user.setLastUpdated(currentTime);
+        user.setLastUpdated(new Timestamp(new Date().getTime()));
         portalUserRepository.save(user);
 
-        UserResponse userResponse = new UserResponse();
-        userResponse.setPhoneNumber(user.getPhoneNumber());
-        userResponse.setEmail(user.getEmail());
-        userResponse.setId(user.getId());
-        userResponse.setFirstName(user.getFirstName());
-        userResponse.setLastName(user.getLastName());
-
-        return userResponse;
+        return buildUserResponse(user, userDTO);
     }
 
     @Override
     public UserResponse deactivateUserAccount(UserDTO userDTO) {
-        Optional<PortalUser> optionalPortalUser = portalUserRepository.findById(userDTO.getId());
-
-        if (!optionalPortalUser.isPresent()) {
-            throw new NotFoundException("User does not exist");
-        }
-
-        PortalUser user = optionalPortalUser.get();
+        PortalUser user = doesUserExist(userDTO);
         user.setStatus(EntityStatus.DEACTIVATED);
         user.setLastUpdated(new Timestamp(new Date().getTime()));
         portalUserRepository.save(user);
 
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getId());
+        UserResponse userResponse = buildUserResponse(user, userDTO);
         userResponse.setActive(false);
 
         return userResponse;
@@ -236,23 +200,12 @@ public class PortalServiceImpl implements PortalService {
 
     @Override
     public UserResponse reactivateUserAccount(UserDTO userDTO) {
-        Optional<PortalUser> optionalPortalUser = portalUserRepository.findById(userDTO.getId());
-
-        if (!optionalPortalUser.isPresent()) {
-            throw new NotFoundException("User does not exist");
-        }
-
-        PortalUser user = optionalPortalUser.get();
+        PortalUser user = doesUserExist(userDTO);
         user.setStatus(EntityStatus.ACTIVE);
         user.setLastUpdated(new Timestamp(new Date().getTime()));
         portalUserRepository.save(user);
 
-        UserResponse userResponse = new UserResponse();
-        userResponse.setEmail(user.getEmail());
-        userResponse.setLastName(user.getLastName());
-        userResponse.setFirstName(user.getFirstName());
-        userResponse.setPhoneNumber(user.getPhoneNumber());
-        userResponse.setId(user.getId());
+        UserResponse userResponse = buildUserResponse(user, userDTO);
         userResponse.setActive(true);
 
         return userResponse;
@@ -279,16 +232,13 @@ public class PortalServiceImpl implements PortalService {
         user.setLastPasswordUpdate(new Timestamp(new Date().getTime()));
         portalUserRepository.save(user);
         log.info(newPassword);
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getId());
-        userResponse.setEmail(user.getEmail());
 
         Map<String, Object> newAccount = new HashMap<>();
         newAccount.put("recieverName", user.getFirstName());
         newAccount.put("password", newPassword);
         emailService.sendHtmlEmail(user.getEmail(), "Naija Travel Shop: Password Reset!", "password-reset-template", newAccount, "travel@naijatravelshop.com");
 
-        return userResponse;
+        return buildUserResponse(user, userDTO);
     }
 
     @Override
@@ -306,14 +256,8 @@ public class PortalServiceImpl implements PortalService {
             user.setLastUpdated(currentTime);
             user.setLastPasswordUpdate(currentTime);
             portalUserRepository.save(user);
-            UserResponse userResponse = new UserResponse();
-            userResponse.setEmail(user.getEmail());
-            userResponse.setPhoneNumber(user.getPhoneNumber());
-            userResponse.setFirstName(user.getFirstName());
-            userResponse.setLastName(user.getLastName());
-            userResponse.setId(user.getId());
 
-            return userResponse;
+            return buildUserResponse(user, null);
         } else {
             throw new BadRequestException("Password is incorrect");
         }
@@ -339,12 +283,7 @@ public class PortalServiceImpl implements PortalService {
         CharSequence passwordCharSequence = new StringBuffer(userDTO.getPassword());
 
         if (passwordEncoder.matches(passwordCharSequence, user.getPassword())) {
-            UserResponse userResponse = new UserResponse();
-            userResponse.setEmail(user.getEmail());
-            userResponse.setId(user.getId());
-            userResponse.setLastName(user.getLastName());
-            userResponse.setFirstName(user.getFirstName());
-            userResponse.setPhoneNumber(user.getPhoneNumber());
+            UserResponse userResponse = buildUserResponse(user, userDTO);
             userResponse.setRoles(roles);
             userResponse.setPasswordReset(user.isPasswordReset());
 
@@ -384,13 +323,9 @@ public class PortalServiceImpl implements PortalService {
             recentBookingResponse.setAmount(reservation.getSellingPrice().doubleValue());
             recentBookingResponse.setBookingDate(reservation.getDateCreated());
             recentBookingResponse.setBookingType(reservation.getReservationType().getValue());
-            if (reservation.getReservationType().equals(ReservationType.FLIGHT)) {
-                if (reservation.getFlightBookingDetail() != null) {
-                    Optional<FlightBookingDetail> optFlightBookingDetail = flightBookingDetailRepository.findById(reservation.getFlightBookingDetail().getId());
-                    if (optFlightBookingDetail.isPresent()) {
-                        recentBookingResponse.setDescription(reservation.getFlightBookingDetail().getFlightSummary());
-                    }
-                }
+            if (reservation.getReservationType().equals(ReservationType.FLIGHT) && reservation.getFlightBookingDetail() != null) {
+                Optional<FlightBookingDetail> optFlightBookingDetail = flightBookingDetailRepository.findById(reservation.getFlightBookingDetail().getId());
+                optFlightBookingDetail.ifPresent(flightBookingDetail -> recentBookingResponse.setDescription(reservation.getFlightBookingDetail().getFlightSummary()));
             }
             recentBookingResponse.setBookingNumber(reservation.getBookingNumber());
             recentBookingResponseList.add(recentBookingResponse);
@@ -517,41 +452,38 @@ public class PortalServiceImpl implements PortalService {
     @Override
     public RecentBookingResponse changeBookingStatus(BookingSearchDTO bookingSearchDTO) {
         Optional<Reservation> optionalReservation = reservationRepository.findFirstByBookingNumberEquals(bookingSearchDTO.getBookingNo());
-        if (optionalReservation.isPresent()) {
-            Reservation reservation = optionalReservation.get();
-            reservation.setReservationStatus(ProcessStatus.valueOf(bookingSearchDTO.getBookingStatus()));
-            reservation.setLastUpdated(new Timestamp(new Date().getTime()));
-            if (bookingSearchDTO.getBookingStatus().equalsIgnoreCase("PROCESSED")) {
-                reservation.setDateProcessed(new Timestamp(new Date().getTime()));
-            }
-            reservationRepository.save(reservation);
-            RecentBookingResponse recentBookingResponse = new RecentBookingResponse();
-            recentBookingResponse.setBookingStatus(reservation.getReservationStatus().getValue());
-            recentBookingResponse.setBookingNumber(reservation.getBookingNumber());
-            return recentBookingResponse;
 
-        } else {
+        if (!optionalReservation.isPresent()) {
             throw new BadRequestException("Reservation does not exist");
         }
+        Reservation reservation = optionalReservation.get();
+        reservation.setReservationStatus(ProcessStatus.valueOf(bookingSearchDTO.getBookingStatus()));
+        reservation.setLastUpdated(new Timestamp(new Date().getTime()));
+        if (bookingSearchDTO.getBookingStatus().equalsIgnoreCase("PROCESSED")) {
+            reservation.setDateProcessed(new Timestamp(new Date().getTime()));
+        }
+        reservationRepository.save(reservation);
+        RecentBookingResponse recentBookingResponse = new RecentBookingResponse();
+        recentBookingResponse.setBookingStatus(reservation.getReservationStatus().getValue());
+        recentBookingResponse.setBookingNumber(reservation.getBookingNumber());
+        return recentBookingResponse;
     }
 
     @Override
     public VisaResponse changeVisaRequestStatus(BookingSearchDTO bookingSearchDTO) {
         Optional<VisaRequest> optionalVisaRequest = visaRequestRepository.findById(Long.valueOf(bookingSearchDTO.getBookingNo()));
-        if (optionalVisaRequest.isPresent()) {
-            VisaRequest visaRequest = optionalVisaRequest.get();
-            visaRequest.setLastUpdated(new Timestamp(new Date().getTime()));
-            visaRequest.setProcessed(Boolean.valueOf(bookingSearchDTO.getBookingStatus()));
-            visaRequestRepository.save(visaRequest);
-
-            VisaResponse visaResponse = VisaResponse.builder()
-                    .processed(Boolean.valueOf(bookingSearchDTO.getBookingStatus()))
-                    .id(Long.valueOf(bookingSearchDTO.getBookingNo()))
-                    .build();
-            return visaResponse;
-        } else {
+        if (!optionalVisaRequest.isPresent()) {
             throw new BadRequestException("Reservation does not exist");
         }
+        VisaRequest visaRequest = optionalVisaRequest.get();
+        visaRequest.setLastUpdated(new Timestamp(new Date().getTime()));
+        visaRequest.setProcessed(Boolean.valueOf(bookingSearchDTO.getBookingStatus()));
+        visaRequestRepository.save(visaRequest);
+
+        return VisaResponse.builder()
+                .processed(Boolean.valueOf(bookingSearchDTO.getBookingStatus()))
+                .id(Long.valueOf(bookingSearchDTO.getBookingNo()))
+                .build();
     }
 
     @Override
@@ -567,16 +499,16 @@ public class PortalServiceImpl implements PortalService {
             userResponse.setFirstName(portalUser.getPortalUser().getFirstName());
             userResponse.setLastName(portalUser.getPortalUser().getLastName());
             userResponse.setEmail(portalUser.getPortalUser().getEmail());
-            if (portalUser.getStatus() == EntityStatus.ACTIVE) {
-                userResponse.setActive(true);
-            } else {
-                userResponse.setActive(false);
+            switch (portalUser.getStatus()) {
+                case ACTIVE:
+                    userResponse.setActive(true);
+                    break;
+                default:
+                    userResponse.setActive(false);
+                    break;
             }
             List<PortalUserRoleMap> roleMaps = portalUserRoleMapRepository.getAllByStatusAndPortalUserEquals(EntityStatus.ACTIVE, portalUser.getPortalUser());
-            List<String> roles = new ArrayList<>();
-            for (PortalUserRoleMap roleMap : roleMaps) {
-                roles.add(roleMap.getRole().getDisplayName());
-            }
+            List<String> roles = roleMaps.stream().map(roleMap -> roleMap.getRole().getDisplayName()).collect(Collectors.toList());
             userResponse.setRoles(roles);
             userResponses.add(userResponse);
         });
@@ -638,100 +570,106 @@ public class PortalServiceImpl implements PortalService {
     @Override
     public String updateExchangeRateSetting(String currency) {
         Optional<Setting> optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.CURRENCY_EXCHANGE_RATE);
-        Setting setting = optionalSetting.get();
-        setting.setValue(currency);
-        settingRepository.save(setting);
-
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(currency);
+            settingRepository.save(setting);
+        });
         return currency;
     }
 
 
     @Override
+    @Transactional
     public FlutterwaveDetail updateFlutterwaveSetting(FlutterwaveDetail flutterwaveDetail) {
         Optional<Setting> optionalSetting;
-        Setting setting;
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.FLW_PAYMENT_VERIFY_ENDPOINT);
-        setting = optionalSetting.get();
-        setting.setValue(flutterwaveDetail.getVerifyEndpoint());
-        settingRepository.save(setting);
-
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(flutterwaveDetail.getVerifyEndpoint());
+            settingRepository.save(setting);
+        });
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.FLW_PUBLIC_KEY);
-        setting = optionalSetting.get();
-        setting.setValue(flutterwaveDetail.getPublicKey());
-        settingRepository.save(setting);
-
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(flutterwaveDetail.getPublicKey());
+            settingRepository.save(setting);
+        });
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.FLW_SECRET_KEY);
-        setting = optionalSetting.get();
-        setting.setValue(flutterwaveDetail.getSecretKey());
-        settingRepository.save(setting);
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(flutterwaveDetail.getSecretKey());
+            settingRepository.save(setting);
+        });
 
         return flutterwaveDetail;
     }
 
     @Override
+    @Transactional
     public AffiliateAccountDetail updateTravelbetaAffiliateSetting(AffiliateAccountDetail affiliateAccountDetail) {
         Optional<Setting> optionalSetting;
-        Setting setting;
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.AFFILIATE_SECRET_KEY);
-        setting = optionalSetting.get();
-        setting.setValue(affiliateAccountDetail.getSecretKey());
-        settingRepository.save(setting);
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(affiliateAccountDetail.getSecretKey());
+            settingRepository.save(setting);
+        });
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.AFFILIATE_CODE);
-        setting = optionalSetting.get();
-        setting.setValue(affiliateAccountDetail.getAffiliateCode());
-        settingRepository.save(setting);
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(affiliateAccountDetail.getAffiliateCode());
+            settingRepository.save(setting);
+        });
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.AFFILIATE_PUBLIC_KEY);
-        setting = optionalSetting.get();
-        setting.setValue(affiliateAccountDetail.getPublicKey());
-        settingRepository.save(setting);
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(affiliateAccountDetail.getPublicKey());
+            settingRepository.save(setting);
+        });
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.API_BASE_URL);
-        setting = optionalSetting.get();
-        setting.setValue(affiliateAccountDetail.getBaseUrl());
-        settingRepository.save(setting);
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(affiliateAccountDetail.getBaseUrl());
+            settingRepository.save(setting);
+        });
 
         return affiliateAccountDetail;
     }
 
     @Override
+    @Transactional
     public DOTWDetail updateDOTWSetting(DOTWDetail dotwDetail) {
         Optional<Setting> optionalSetting;
-        Setting setting;
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.DOTW_HOST_URL);
-        setting = optionalSetting.get();
-        setting.setValue(dotwDetail.getHostUrl());
-        settingRepository.save(setting);
-
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(dotwDetail.getHostUrl());
+            settingRepository.save(setting);
+        });
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.DOTW_CUSTOMER_NAME);
-        setting = optionalSetting.get();
-        setting.setValue(dotwDetail.getCustomerName());
-        settingRepository.save(setting);
-
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(dotwDetail.getCustomerName());
+            settingRepository.save(setting);
+        });
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.DOTW_LOGIN_ID);
-        setting = optionalSetting.get();
-        setting.setValue(dotwDetail.getId());
-        settingRepository.save(setting);
-
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(dotwDetail.getId());
+            settingRepository.save(setting);
+        });
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.DOTW_LOGIN_PASSWORD);
-        setting = optionalSetting.get();
-        setting.setValue(dotwDetail.getPassword());
-        settingRepository.save(setting);
-
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(dotwDetail.getPassword());
+            settingRepository.save(setting);
+        });
 
         optionalSetting = settingRepository.findFirstByNameEquals(ProjectConstant.DOTW_COMPANY_CODE);
-        setting = optionalSetting.get();
-        setting.setValue(dotwDetail.getCompanyCode());
-        settingRepository.save(setting);
+        optionalSetting.ifPresent(setting -> {
+            setting.setValue(dotwDetail.getCompanyCode());
+            settingRepository.save(setting);
+        });
 
         return dotwDetail;
     }
@@ -739,34 +677,24 @@ public class PortalServiceImpl implements PortalService {
     @Override
     public List<String> getAllRoles() {
         List<Role> allRoles = (List<Role>) roleRepository.findAll();
-
         return allRoles.stream().map(Role::getDisplayName).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional
     public void updateUserRoles(UserDTO userDTO) {
         Optional<PortalUser> optionalPortalUser = portalUserRepository.findFirstByEmailAndStatus(userDTO.getEmail(), EntityStatus.ACTIVE);
-        if (optionalPortalUser.isPresent()) {
-            List<PortalUserRoleMap> portalUserRoleMaps = portalUserRoleMapRepository.getAllByStatusAndPortalUserEquals(EntityStatus.ACTIVE, optionalPortalUser.get());
-
-            for (PortalUserRoleMap portalUserRoleMap : portalUserRoleMaps) {
-                if (!portalUserRoleMap.getRole().getDisplayName().equals(RoleType.PORTAL_USER.getValue())) {
-                    portalUserRoleMapRepository.delete(portalUserRoleMap);
-                }
-            }
-            for (String role : userDTO.getRoles()) {
-                Optional<Role> optionalRole = roleRepository.findFirstByDisplayName(role);
-                PortalUserRoleMap portalUserRoleMap = new PortalUserRoleMap();
-                portalUserRoleMap.setPortalUser(optionalPortalUser.get());
-                portalUserRoleMap.setRole(optionalRole.get());
-                portalUserRoleMap.setStatus(EntityStatus.ACTIVE);
-                portalUserRoleMapRepository.save(portalUserRoleMap);
-            }
-
-        } else {
+        if (!optionalPortalUser.isPresent()) {
             throw new BadRequestException("Could not fetch user");
         }
+        List<PortalUserRoleMap> portalUserRoleMaps = portalUserRoleMapRepository.getAllByStatusAndPortalUserEquals(EntityStatus.ACTIVE, optionalPortalUser.get());
+        portalUserRoleMaps.stream().filter(portalUserRoleMap -> !portalUserRoleMap.getRole().getDisplayName().equals(RoleType.PORTAL_USER.getValue())).forEachOrdered(portalUserRoleMap -> portalUserRoleMapRepository.delete(portalUserRoleMap));
+        userDTO.getRoles().stream().map(role -> roleRepository.findFirstByDisplayName(role)).forEachOrdered(optionalRole -> {
+            PortalUserRoleMap portalUserRoleMap = new PortalUserRoleMap();
+            portalUserRoleMap.setPortalUser(optionalPortalUser.get());
+            portalUserRoleMap.setRole(optionalRole.get());
+            portalUserRoleMap.setStatus(EntityStatus.ACTIVE);
+            portalUserRoleMapRepository.save(portalUserRoleMap);
+        });
     }
 
     @Override
@@ -800,18 +728,17 @@ public class PortalServiceImpl implements PortalService {
     public void unSubscribeEmail(UserDTO userDTO) {
         Optional<Customer> optionalCustomer = customerRepository.findCustomerByEmail(userDTO.getEmail());
 
-        if (!optionalCustomer.isPresent()) {
-            throw new BadRequestException("Your subscription does not exist");
-        }
+        optionalCustomer.ifPresent(customer -> {
+            customer.setSubscribed(false);
+            customerRepository.save(customer);
 
-        Customer customer = optionalCustomer.get();
-        customer.setSubscribed(false);
-        customerRepository.save(customer);
+            Map<String, Object> emailSubscriptionObjectMap = new HashMap<>();
+            emailSubscriptionObjectMap.put("message", "You have been unsubscribed from our newsletters, promos, and broadcasts.");
 
-        Map<String, Object> emailSubscriptionObjectMap = new HashMap<>();
-        emailSubscriptionObjectMap.put("message", "You have been unsubscribed from our newsletters, promos, and broadcasts.");
+            emailService.sendHtmlEmail(userDTO.getEmail(), "Naija Travel Shop: Email Unsubscription!", "email-subscription-template", emailSubscriptionObjectMap, "travel@naijatravelshop.com");
+        });
 
-        emailService.sendHtmlEmail(userDTO.getEmail(), "Naija Travel Shop: Email Unsubscription!", "email-subscription-template", emailSubscriptionObjectMap, "travel@naijatravelshop.com");
+        throw new BadRequestException("Your subscription does not exist");
     }
 
     @Override
@@ -850,152 +777,151 @@ public class PortalServiceImpl implements PortalService {
     public FlightReservationResponse getFlightBookingDetails(String bookingNumber) {
         Optional<Reservation> optionalReservation = reservationRepository.findFirstByBookingNumberEquals(bookingNumber);
         FlightReservationResponse response = new FlightReservationResponse();
-        if (optionalReservation.isPresent()) {
-            try {
-                Reservation reservation = optionalReservation.get();
-                if (reservation.getFlightBookingDetail() != null) {
-                    Optional<FlightBookingDetail> flightBookingDetail = flightBookingDetailRepository.findById(reservation.getFlightBookingDetail().getId());
-                    response.setHotelServiceRequested(flightBookingDetail.get().getHotelServiceRequested());
-                    response.setNumberOfAdult(flightBookingDetail.get().getNumberOfAdult());
-                    response.setNumberOfChildren(flightBookingDetail.get().getNumberOfChildren());
-                    response.setNumberOfInfant(flightBookingDetail.get().getNumberOfInfant());
-                    response.setVisaServiceRequested(flightBookingDetail.get().getVisaServiceRequested());
 
-                    List<FlightRoute> flightRoutes = flightRouteRepository.findAllByFlightBookingDetail(flightBookingDetail.get());
-                    List<FlightSegmentsDTO> flightSegmentsDTOS = new ArrayList<>();
-                    for (int i = 0, flightRoutesSize = flightRoutes.size(); i < flightRoutesSize; i++) {
-                        FlightRoute flightRoute = flightRoutes.get(i);
-                        FlightSegmentsDTO flightSegmentsDTO = new FlightSegmentsDTO();
-                        flightSegmentsDTO.setAirlineCode(flightRoute.getMarketingAirlineCode());
-                        flightSegmentsDTO.setAirlineName(flightRoute.getAirlineName());
-                        flightSegmentsDTO.setArrivalAirportCode(flightRoute.getDestinationAirport());
-                        flightSegmentsDTO.setArrivalAirportName(flightRoute.getDestinationCityName());
-                        flightSegmentsDTO.setArrivalTime(flightRoute.getArrivalTime().toString());
-                        flightSegmentsDTO.setBookingClass(flightRoute.getBookingClass());
-                        flightSegmentsDTO.setDepartureAirportCode(flightRoute.getDepartureCityName());
-                        flightSegmentsDTO.setDepartureAirportName(flightRoute.getDepartureAirport());
-                        flightSegmentsDTO.setDepartureTime(flightRoute.getDepartureTime().toString());
-                        flightSegmentsDTO.setFlightNumber(flightRoute.getFlightNumber());
-                        flightSegmentsDTO.setJourneyDuration(flightRoute.getFlightDuration());
-                        flightSegmentsDTOS.add(flightSegmentsDTO);
-                    }
-                    response.setFlightRoutes(flightSegmentsDTOS);
-                }
-                Optional<PaymentHistory> paymentHistory = paymentHistoryRepository.findPaymentHistoryByReservation(reservation);
-
-                response.setBookingDate(reservation.getDateCreated());
-                response.setBookingNumber(bookingNumber);
-                response.setDateProcessed(reservation.getDateProcessed());
-                response.setReservationStatus(reservation.getReservationStatus().getValue());
-                response.setSellingPrice(reservation.getSellingPrice());
-                response.setReservationOwner(reservationOwnerToTravellerDTO(reservation));
-
-                if (paymentHistory.isPresent()) {
-                    response.setPaymentDate(paymentHistory.get().getPaymentDate());
-                    response.setPaymentReference(paymentHistory.get().getPaymentReference());
-                    response.setTransactionId(paymentHistory.get().getTransactionId());
-                    response.setPaymentStatus(paymentHistory.get().getPaymentStatus().getValue());
-                    response.setPaymentChannel(paymentHistory.get().getPaymentChannel().getValue());
-                }
-
-                List<Traveller> travellers = travellerRepository.getAllByReservation(reservation);
-                List<TravellerDTO> travellerDTOList = new ArrayList<>();
-                for (int i = 0, travellersSize = travellers.size(); i < travellersSize; i++) {
-                    Traveller traveller = travellers.get(i);
-                    TravellerDTO travellerDTO = new TravellerDTO();
-                    travellerDTO.setTitle(traveller.getTitle());
-                    travellerDTO.setLastName(traveller.getLastName());
-                    travellerDTO.setFirstName(traveller.getFirstName());
-                    travellerDTO.setDateOfBirth(traveller.getDateOfBirth().toString());
-                    travellerDTOList.add(travellerDTO);
-                }
-                response.setTravellers(travellerDTOList);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return response;
-        } else {
+        if (!optionalReservation.isPresent()) {
             throw new BadRequestException("Reservation does not exist");
         }
+
+        try {
+            Reservation reservation = optionalReservation.get();
+            if (reservation.getFlightBookingDetail() != null) {
+                Optional<FlightBookingDetail> flightBookingDetail = flightBookingDetailRepository.findById(reservation.getFlightBookingDetail().getId());
+                response.setHotelServiceRequested(flightBookingDetail.get().getHotelServiceRequested());
+                response.setNumberOfAdult(flightBookingDetail.get().getNumberOfAdult());
+                response.setNumberOfChildren(flightBookingDetail.get().getNumberOfChildren());
+                response.setNumberOfInfant(flightBookingDetail.get().getNumberOfInfant());
+                response.setVisaServiceRequested(flightBookingDetail.get().getVisaServiceRequested());
+
+                List<FlightRoute> flightRoutes = flightRouteRepository.findAllByFlightBookingDetail(flightBookingDetail.get());
+                List<FlightSegmentsDTO> flightSegmentsDTOS = new ArrayList<>();
+                for (int i = 0, flightRoutesSize = flightRoutes.size(); i < flightRoutesSize; i++) {
+                    FlightRoute flightRoute = flightRoutes.get(i);
+                    FlightSegmentsDTO flightSegmentsDTO = new FlightSegmentsDTO();
+                    flightSegmentsDTO.setAirlineCode(flightRoute.getMarketingAirlineCode());
+                    flightSegmentsDTO.setAirlineName(flightRoute.getAirlineName());
+                    flightSegmentsDTO.setArrivalAirportCode(flightRoute.getDestinationAirport());
+                    flightSegmentsDTO.setArrivalAirportName(flightRoute.getDestinationCityName());
+                    flightSegmentsDTO.setArrivalTime(flightRoute.getArrivalTime().toString());
+                    flightSegmentsDTO.setBookingClass(flightRoute.getBookingClass());
+                    flightSegmentsDTO.setDepartureAirportCode(flightRoute.getDepartureCityName());
+                    flightSegmentsDTO.setDepartureAirportName(flightRoute.getDepartureAirport());
+                    flightSegmentsDTO.setDepartureTime(flightRoute.getDepartureTime().toString());
+                    flightSegmentsDTO.setFlightNumber(flightRoute.getFlightNumber());
+                    flightSegmentsDTO.setJourneyDuration(flightRoute.getFlightDuration());
+                    flightSegmentsDTOS.add(flightSegmentsDTO);
+                }
+                response.setFlightRoutes(flightSegmentsDTOS);
+            }
+            Optional<PaymentHistory> optionalPaymentHistory = paymentHistoryRepository.findPaymentHistoryByReservation(reservation);
+
+            response.setBookingDate(reservation.getDateCreated());
+            response.setBookingNumber(bookingNumber);
+            response.setDateProcessed(reservation.getDateProcessed());
+            response.setReservationStatus(reservation.getReservationStatus().getValue());
+            response.setSellingPrice(reservation.getSellingPrice());
+            response.setReservationOwner(reservationOwnerToTravellerDTO(reservation));
+
+            optionalPaymentHistory.ifPresent(paymentHistory -> {
+                response.setPaymentDate(paymentHistory.getPaymentDate());
+                response.setPaymentReference(paymentHistory.getPaymentReference());
+                response.setTransactionId(paymentHistory.getTransactionId());
+                response.setPaymentStatus(paymentHistory.getPaymentStatus().getValue());
+                response.setPaymentChannel(paymentHistory.getPaymentChannel().getValue());
+            });
+
+            List<Traveller> travellers = travellerRepository.getAllByReservation(reservation);
+            List<TravellerDTO> travellerDTOList = new ArrayList<>();
+            for (int i = 0, travellersSize = travellers.size(); i < travellersSize; i++) {
+                Traveller traveller = travellers.get(i);
+                TravellerDTO travellerDTO = new TravellerDTO();
+                travellerDTO.setTitle(traveller.getTitle());
+                travellerDTO.setLastName(traveller.getLastName());
+                travellerDTO.setFirstName(traveller.getFirstName());
+                travellerDTO.setDateOfBirth(traveller.getDateOfBirth().toString());
+                travellerDTOList.add(travellerDTO);
+            }
+            response.setTravellers(travellerDTOList);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BadRequestException("Error Fetching Flight Booking Details: " + e.getMessage());
+        }
+        return response;
     }
 
     @Override
     public HotelReservationResponse getHotelBookingDetails(String bookingNumber) {
         Optional<Reservation> optionalReservation = reservationRepository.findFirstByBookingNumberEquals(bookingNumber);
-
-        if (optionalReservation.isPresent()) {
-            try {
-                Reservation reservation = optionalReservation.get();
-                HotelBookingDetail hotelBookingDetail = reservation.getHotelBookingDetail();
-                Optional<PaymentHistory> paymentHistory = paymentHistoryRepository.findPaymentHistoryByReservation(reservation);
-                List<RoomOffer> roomOffers = roomOfferRepository.getAllByHotelBookingDetail(hotelBookingDetail);
-                List<RoomDTO> roomDTOS = new ArrayList<>();
-
-                for (RoomOffer roomOffer : roomOffers) {
-                    List<Traveller> travellers = travellerRepository.getAllByRoomOffer(roomOffer);
-                    List<TravellerDTO> adultList = new ArrayList<>();
-                    List<TravellerDTO> childrenList = new ArrayList<>();
-
-                    for (Traveller traveller : travellers) {
-                        TravellerDTO travellerDTO = new TravellerDTO();
-                        travellerDTO.setFirstName(traveller.getFirstName());
-                        travellerDTO.setLastName(traveller.getLastName());
-                        travellerDTO.setTitle(traveller.getTitle());
-                        travellerDTO.setAge(traveller.getAge());
-                        travellerDTO.setCountryName(traveller.getNationality());
-
-                        if (traveller.getAge() > 12) {
-                            adultList.add(travellerDTO);
-                        } else {
-                            childrenList.add(travellerDTO);
-                        }
-                    }
-
-                    RoomDTO roomDTO = RoomDTO.builder()
-                            .adultList(adultList)
-                            .childrenList(childrenList)
-                            .numberOfAdults(adultList.size())
-                            .numberOfChildren(childrenList.size())
-                            .build();
-                    roomDTOS.add(roomDTO);
-                }
-
-                HotelReservationResponse response = HotelReservationResponse.builder()
-                        .bookingDate(reservation.getDateCreated())
-                        .bookingNumber(bookingNumber)
-                        .checkInDate(hotelBookingDetail.getCheckinDate())
-                        .checkOutDate(hotelBookingDetail.getCheckoutDate())
-                        .cityName(hotelBookingDetail.getCityName())
-                        .countryName(hotelBookingDetail.getCountryName())
-                        .dateProcessed(reservation.getDateProcessed())
-                        .hotelDescription(hotelBookingDetail.getHotelDescription())
-                        .hotelId(hotelBookingDetail.getHotelId())
-                        .hotelName(hotelBookingDetail.getHotelName())
-                        .hotelServiceRequested(false)
-                        .numberOfAdult(hotelBookingDetail.getNumberOfAdult())
-                        .numberOfChildren(hotelBookingDetail.getNumberOfChildren())
-                        .numberOfRooms(hotelBookingDetail.getNumberOfRoom())
-                        .nights(hotelBookingDetail.getNumberOfNightsStay())
-                        .paymentChannel(paymentHistory.isPresent() ? paymentHistory.get().getPaymentChannel().getValue() : "")
-                        .paymentDate(paymentHistory.isPresent() ? paymentHistory.get().getPaymentDate() : null)
-                        .paymentReference(paymentHistory.isPresent() ? paymentHistory.get().getPaymentReference() : "")
-                        .paymentStatus(paymentHistory.isPresent() ? paymentHistory.get().getPaymentStatus().getValue() : "")
-                        .reservationOwner(reservationOwnerToTravellerDTO(reservation))
-                        .reservationStatus(reservation.getReservationStatus().getValue())
-                        .rooms(roomDTOS)
-                        .roomType(hotelBookingDetail.getRoomType())
-                        .sellingPrice(reservation.getSellingPrice())
-                        .transactionId(paymentHistory.isPresent() ? paymentHistory.get().getTransactionId() : "")
-                        .visaServiceRequested(false)
-                        .build();
-
-                return response;
-            } catch (Exception e) {
-                throw new BadRequestException(e.getMessage());
-            }
-        } else {
+        if (!optionalReservation.isPresent()) {
             throw new BadRequestException("Reservation does not exist");
+        }
+        try {
+            Reservation reservation = optionalReservation.get();
+            HotelBookingDetail hotelBookingDetail = reservation.getHotelBookingDetail();
+            Optional<PaymentHistory> paymentHistory = paymentHistoryRepository.findPaymentHistoryByReservation(reservation);
+            List<RoomOffer> roomOffers = roomOfferRepository.getAllByHotelBookingDetail(hotelBookingDetail);
+            List<RoomDTO> roomDTOS = new ArrayList<>();
+
+            roomOffers.stream().map(roomOffer -> travellerRepository.getAllByRoomOffer(roomOffer)).forEachOrdered(travellers -> {
+                List<TravellerDTO> adultList = new ArrayList<>();
+                List<TravellerDTO> childrenList = new ArrayList<>();
+                for (int i = 0, travellersSize = travellers.size(); i < travellersSize; i++) {
+                    Traveller traveller = travellers.get(i);
+                    TravellerDTO travellerDTO = new TravellerDTO();
+                    travellerDTO.setFirstName(traveller.getFirstName());
+                    travellerDTO.setLastName(traveller.getLastName());
+                    travellerDTO.setTitle(traveller.getTitle());
+                    travellerDTO.setAge(traveller.getAge());
+                    travellerDTO.setCountryName(traveller.getNationality());
+
+                    if (traveller.getAge() > 12) {
+                        adultList.add(travellerDTO);
+                    } else {
+                        childrenList.add(travellerDTO);
+                    }
+                }
+                RoomDTO roomDTO = RoomDTO.builder()
+                        .adultList(adultList)
+                        .childrenList(childrenList)
+                        .numberOfAdults(adultList.size())
+                        .numberOfChildren(childrenList.size())
+                        .build();
+                roomDTOS.add(roomDTO);
+            });
+
+            HotelReservationResponse response = HotelReservationResponse.builder()
+                    .bookingDate(reservation.getDateCreated())
+                    .bookingNumber(bookingNumber)
+                    .checkInDate(hotelBookingDetail.getCheckinDate())
+                    .checkOutDate(hotelBookingDetail.getCheckoutDate())
+                    .cityName(hotelBookingDetail.getCityName())
+                    .countryName(hotelBookingDetail.getCountryName())
+                    .dateProcessed(reservation.getDateProcessed())
+                    .hotelDescription(hotelBookingDetail.getHotelDescription())
+                    .hotelId(hotelBookingDetail.getHotelId())
+                    .hotelName(hotelBookingDetail.getHotelName())
+                    .hotelServiceRequested(false)
+                    .numberOfAdult(hotelBookingDetail.getNumberOfAdult())
+                    .numberOfChildren(hotelBookingDetail.getNumberOfChildren())
+                    .numberOfRooms(hotelBookingDetail.getNumberOfRoom())
+                    .nights(hotelBookingDetail.getNumberOfNightsStay())
+                    .paymentChannel(paymentHistory.isPresent() ? paymentHistory.get().getPaymentChannel().getValue() : "")
+                    .paymentDate(paymentHistory.isPresent() ? paymentHistory.get().getPaymentDate() : null)
+                    .paymentReference(paymentHistory.isPresent() ? paymentHistory.get().getPaymentReference() : "")
+                    .paymentStatus(paymentHistory.isPresent() ? paymentHistory.get().getPaymentStatus().getValue() : "")
+                    .reservationOwner(reservationOwnerToTravellerDTO(reservation))
+                    .reservationStatus(reservation.getReservationStatus().getValue())
+                    .rooms(roomDTOS)
+                    .roomType(hotelBookingDetail.getRoomType())
+                    .sellingPrice(reservation.getSellingPrice())
+                    .transactionId(paymentHistory.isPresent() ? paymentHistory.get().getTransactionId() : "")
+                    .visaServiceRequested(false)
+                    .build();
+
+            return response;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -1072,18 +998,6 @@ public class PortalServiceImpl implements PortalService {
     }
 
     private void visaResponseObjectBuilder2(List<VisaResponse> visaResponseList, VisaRequest visa) {
-//        VisaResponse visaResponse = new VisaResponse();
-//        visaResponse.setResidentCountry((visa.getResidentCountry() != null) ? visa.getResidentCountry().getName() : "");
-//        visaResponse.setTravelDate(visa.getTravelDate());
-//        visaResponse.setDestinationCountry((visa.getDestinationCountry() != null) ? visa.getDestinationCountry().getCountryName() : "");
-//        visaResponse.setEmail(visa.getEmail());
-//        visaResponse.setFirstName(visa.getFirstName());
-//        visaResponse.setId(visa.getId());
-//        visaResponse.setLastName(visa.getLastName());
-//        visaResponse.setProcessed(visa.isProcessed());
-//        visaResponse.setPhoneNumber(visa.getPhoneNumber());
-//        visaResponse.setReturnDate(visa.getReturnDate());
-
         VisaResponse visaResponse = VisaResponse.builder()
                 .additionalInfo(visa.getAdditionalInfo())
                 .applicationCapacity(visa.getApplicationCapacity())
@@ -1163,7 +1077,7 @@ public class PortalServiceImpl implements PortalService {
     }
 
     private List<RecentBookingResponse> getRecentBookingResponses(List<RecentBookingResponse> bookingList, Optional<Reservation> optionalReservation) {
-        if (optionalReservation.isPresent()) {
+        optionalReservation.ifPresent(reservation -> {
             RecentBookingResponse recentBookingResponse = new RecentBookingResponse();
             recentBookingResponse.setAmount(optionalReservation.get().getSellingPrice().doubleValue());
             recentBookingResponse.setBookingDate(optionalReservation.get().getDateCreated());
@@ -1171,7 +1085,7 @@ public class PortalServiceImpl implements PortalService {
             recentBookingResponse.setBookingNumber(optionalReservation.get().getBookingNumber());
             recentBookingResponse.setOwnerEmail(optionalReservation.get().getReservationOwner().getEmail());
             bookingList.add(recentBookingResponse);
-        }
+        });
         return bookingList;
     }
 
@@ -1219,4 +1133,27 @@ public class PortalServiceImpl implements PortalService {
         }
         return builder.toString();
     }
+
+    private PortalUser doesUserExist(UserDTO userDTO) {
+        Optional<PortalUser> optionalPortalUser = portalUserRepository.findById(userDTO.getId());
+
+        if (!optionalPortalUser.isPresent()) {
+            throw new NotFoundException("User does not exist");
+        }
+
+        return optionalPortalUser.get();
+    }
+
+    private UserResponse buildUserResponse(PortalUser user, UserDTO userDTO) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setEmail(user.getEmail());
+        userResponse.setFirstName(user.getFirstName());
+        userResponse.setLastName(user.getLastName());
+        userResponse.setId(user.getId());
+        userResponse.setPhoneNumber(user.getPhoneNumber());
+        userResponse.setRoles(userDTO != null ? userDTO.getRoles() : null);
+
+        return userResponse;
+    }
+
 }

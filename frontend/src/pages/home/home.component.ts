@@ -21,7 +21,7 @@ import { HotelSearch } from '../../model/HotelSearch';
     moduleId: module.id,
     selector: 'home',
     templateUrl: 'home.component.html',
-    styleUrls: ['home.component.scss']
+    styleUrls: []
 })
 export class HomeComponent {
     initModel: InitModel = new InitModel();

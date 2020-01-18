@@ -55,6 +55,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,7 +71,6 @@ import java.util.Optional;
 @Service
 public class FlightServiceImpl implements FlightService {
     private AddressRepository addressRepository;
-    private PaymentHistoryRepository paymentHistoryRepository;
     private ReservationOwnerRepository reservationOwnerRepository;
     private ReservationRepository reservationRepository;
     private TravellerRepository travellerRepository;
@@ -78,7 +78,6 @@ public class FlightServiceImpl implements FlightService {
     private PortalUserRepository portalUserRepository;
     private FlightBookingDetailRepository flightBookingDetailRepository;
     private FlightRouteRepository flightRouteRepository;
-    private VisaRequestRepository visaRequestRepository;
     private CustomerRepository customerRepository;
     private ServiceRequestRepository serviceRequestRepository;
     private ServiceRequestActorHistoryRepository serviceRequestActorHistoryRepository;
@@ -107,7 +106,6 @@ public class FlightServiceImpl implements FlightService {
                              FlightCityRepository flightCityRepository,
                              EmailService emailService) {
         this.addressRepository = addressRepository;
-        this.paymentHistoryRepository = paymentHistoryRepository;
         this.reservationOwnerRepository = reservationOwnerRepository;
         this.reservationRepository = reservationRepository;
         this.travellerRepository = travellerRepository;
@@ -115,7 +113,6 @@ public class FlightServiceImpl implements FlightService {
         this.portalUserRepository = portalUserRepository;
         this.flightBookingDetailRepository = flightBookingDetailRepository;
         this.flightRouteRepository = flightRouteRepository;
-        this.visaRequestRepository = visaRequestRepository;
         this.customerRepository = customerRepository;
         this.serviceRequestRepository = serviceRequestRepository;
         this.serviceRequestLogRepository = serviceRequestLogRepository;
@@ -129,130 +126,21 @@ public class FlightServiceImpl implements FlightService {
     @Transactional
     public ReservationResponseDTO createReservation(ReservationRequestDTO requestDTO) {
         try {
-            Optional<Country> optionalCountry = countryRepository.findFirstByCode(requestDTO.getReservationOwner().getCountryCode());
+            Address address = createReservationAddress(requestDTO);
 
-            Address address = new Address();
-            address.setName(requestDTO.getReservationOwner().getAddress());
-            address.setCity(requestDTO.getReservationOwner().getCity());
-            if (optionalCountry.isPresent()) {
-                address.setCountry(optionalCountry.get());
-            }
-            addressRepository.save(address);
+            ReservationOwner reservationOwner = createReservationOwner(requestDTO, address);
 
-            ReservationOwner owner = new ReservationOwner();
-            Date dob = new SimpleDateFormat("dd/MM/yyyy").parse(requestDTO.getReservationOwner().getDateOfBirth());
-            owner.setFirstName(requestDTO.getReservationOwner().getFirstName());
-            owner.setLastName(requestDTO.getReservationOwner().getLastName());
-            owner.setAddress(address);
-            owner.setDateOfBirth(new Timestamp(dob.getTime()));
-            owner.setEmail(requestDTO.getReservationOwner().getEmail());
-            owner.setPhoneNumber(requestDTO.getReservationOwner().getPhoneNumber());
-            if (optionalCountry.isPresent()) {
-                owner.setNationality(optionalCountry.get());
-            }
+            FlightBookingDetail flightBookingDetail = createFlightBookingDetail(requestDTO);
 
-            if (requestDTO.getReservationOwner().getTitleCode() == 1) {
-                owner.setTitle("MISS");
-            }
-            if (requestDTO.getReservationOwner().getTitleCode() == 3) {
-                owner.setTitle("MRS");
-            }
+            List<FlightRoute> flightRouteList = createFlightRoute(requestDTO, flightBookingDetail);
 
-            if (requestDTO.getReservationOwner().getTitleCode() == 0) {
-                owner.setTitle("MR");
-            }
-            reservationOwnerRepository.save(owner);
+            Reservation reservation = persistReservation(requestDTO, reservationOwner, flightBookingDetail);
 
-            FlightBookingDetail flightBookingDetail = new FlightBookingDetail();
-            flightBookingDetail.setBookingDate(new Timestamp(new Date().getTime()));
-            flightBookingDetail.setNumberOfAdult(requestDTO.getFlightSearch().getTravellerDetail().getAdults());
-            flightBookingDetail.setNumberOfChildren(requestDTO.getFlightSearch().getTravellerDetail().getChildren());
-            flightBookingDetail.setNumberOfInfant(requestDTO.getFlightSearch().getTravellerDetail().getInfants());
-            flightBookingDetail.setFlightSummary(requestDTO.getFlightSummary());
-            flightBookingDetail.setPnr(requestDTO.getBookingNumber());
-            flightBookingDetailRepository.save(flightBookingDetail);
+            List<Traveller> travellerList = createTravellers(requestDTO, reservation);
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            List<FlightRoute> flightRouteList = new ArrayList<>();
-            for (OriginDestinationOptionsDTO originDestinationOptionsDTO : requestDTO.getFlightDetails().getOriginDestinationOptions()) {
-                for (FlightSegmentsDTO flightSegmentsDTO : originDestinationOptionsDTO.getFlightSegments()) {
-                    FlightRoute flightRoute = new FlightRoute();
-                    flightRoute.setArrivalTime(new Timestamp(simpleDateFormat.parse(flightSegmentsDTO.getArrivalTime()).getTime()));
-                    flightRoute.setDepartureAirport(flightSegmentsDTO.getDepartureAirportName());
-                    flightRoute.setDepartureCityName(flightSegmentsDTO.getDepartureAirportName().split("-")[0]);
-                    flightRoute.setDepartureTime(new Timestamp(simpleDateFormat.parse(flightSegmentsDTO.getDepartureTime()).getTime()));
-                    flightRoute.setDestinationAirport(flightSegmentsDTO.getArrivalAirportName());
-                    flightRoute.setDestinationCityName(flightSegmentsDTO.getArrivalAirportName().split("-")[0]);
-                    flightRoute.setFlightDuration(flightSegmentsDTO.getJourneyDuration());
-                    flightRoute.setFlightBookingDetail(flightBookingDetail);
-                    flightRoute.setFlightNumber(flightSegmentsDTO.getFlightNumber());
-                    flightRoute.setMarketingAirlineCode(flightSegmentsDTO.getAirlineCode());
-                    flightRoute.setMarketingAirlineName(flightSegmentsDTO.getAirlineName());
-                    flightRoute.setOperatingAirlineCode(flightSegmentsDTO.getAirlineCode());
-                    flightRoute.setAirlineName(flightSegmentsDTO.getAirlineName());
-                    flightRoute.setBookingClass(flightSegmentsDTO.getBookingClass());
+            createFlightServiceRequest(reservation, reservationOwner, requestDTO);
 
-                    flightRouteList.add(flightRoute);
-                    flightRouteRepository.save(flightRoute);
-                }
-            }
-
-            Reservation reservation = new Reservation();
-            reservation.setSellingPrice(requestDTO.getAmount().longValue());
-            reservation.setBookingNumber(requestDTO.getBookingNumber());
-            reservation.setReservationOwner(owner);
-            reservation.setStatus(EntityStatus.ACTIVE);
-            reservation.setTransactionFeeInKobo(0L);
-            reservation.setSupplierGroupType(SupplierGroupType.AMADEUS);
-            reservation.setMargin(0L);
-            reservation.setReservationStatus(ProcessStatus.PENDING);
-            reservation.setReservationType(ReservationType.FLIGHT);
-            reservation.setFlightBookingDetail(flightBookingDetail);
-            if (requestDTO.getPortalUsername() != null) {
-                Optional<PortalUser> optionalPortalUser = portalUserRepository.findFirstByEmailAndStatus(requestDTO.getPortalUsername(), EntityStatus.ACTIVE);
-                reservation.setProcessedBy(optionalPortalUser.get());
-            }
-            reservationRepository.save(reservation);
-
-            List<Traveller> travellerList = new ArrayList<>();
-            for (TravellerDTO traveller : requestDTO.getTravellers()) {
-                Date dateOfBirth = new SimpleDateFormat("dd/MM/yyyy").parse(traveller.getDateOfBirth());
-
-                Traveller t = new Traveller();
-                t.setDateOfBirth(new Timestamp(dateOfBirth.getTime()));
-                t.setFirstName(traveller.getFirstName());
-                t.setLastName(traveller.getLastName());
-
-                if (traveller.getTitleCode() == 1) {
-                    t.setTitle("MISS");
-                    t.setGender(Gender.FEMALE);
-                }
-                if (traveller.getTitleCode() == 3) {
-                    t.setTitle("MRS");
-                    t.setGender(Gender.FEMALE);
-                }
-
-                if (traveller.getTitleCode() == 0) {
-                    t.setTitle("MR");
-                    t.setGender(Gender.MALE);
-                }
-
-                if (traveller.getTitleCode() == 2) {
-                    t.setTitle("MASTER");
-                    t.setGender(Gender.MALE);
-                }
-                travellerList.add(t);
-                t.setReservation(reservation);
-                travellerRepository.save(t);
-            }
-
-            try {
-                createFlightServiceRequest(reservation, owner, requestDTO);
-                sendFlightBookingEmail(owner, reservation, travellerList, flightRouteList);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                e.printStackTrace();
-            }
+            sendFlightBookingEmail(reservationOwner, reservation, travellerList, flightRouteList);
 
             ReservationResponseDTO responseDTO = new ReservationResponseDTO();
             responseDTO.setBookingNumber(reservation.getBookingNumber());
@@ -285,7 +173,7 @@ public class FlightServiceImpl implements FlightService {
                     .latitude(airport.getLatitude())
                     .longitude(airport.getLongitude())
                     .name(airport.getName())
-                    .displayName(airport.getName() + " (" + airport.getIataCode() + "), " + flightCity.get().getName()+", "+ country.get().getName())
+                    .displayName(airport.getName() + " (" + airport.getIataCode() + "), " + flightCity.get().getName() + ", " + country.get().getName())
                     .timezone(airport.getTimezone())
                     .build();
 
@@ -294,14 +182,21 @@ public class FlightServiceImpl implements FlightService {
         return airportDTOS;
     }
 
-    @Transactional
-    public void createFlightServiceRequest(Reservation reservation, ReservationOwner reservationOwner, ReservationRequestDTO requestDTO) {
+     private void createFlightServiceRequest(Reservation reservation, ReservationOwner reservationOwner, ReservationRequestDTO requestDTO) {
+        ServiceRequest serviceRequest = createServiceRequest(reservation, reservationOwner, requestDTO);
+
+        if (reservation.getProcessedBy() != null) {
+            ServiceRequestActorHistory actorHistory = createServiceRequestActorHistory(serviceRequest, reservation);
+            createServiceRequestLog(actorHistory);
+        }
+    }
+
+    private Customer createCustomer(ReservationOwner reservationOwner) {
         Optional<Customer> optionalCustomer = customerRepository.findCustomerByEmail(reservationOwner.getEmail());
-        Customer customer;
         if (optionalCustomer.isPresent()) {
-            customer = optionalCustomer.get();
+            return optionalCustomer.get();
         } else {
-            customer = new Customer();
+            Customer customer = new Customer();
             customer.setEmail(reservationOwner.getEmail());
             customer.setFirstName(reservationOwner.getFirstName());
             customer.setLastName(reservationOwner.getLastName());
@@ -309,35 +204,170 @@ public class FlightServiceImpl implements FlightService {
             customer.setStatus(EntityStatus.ACTIVE);
             customer.setDateOfBirth(reservationOwner.getDateOfBirth());
             customer.setTitle(reservationOwner.getTitle());
-            customerRepository.save(customer);
+            return customerRepository.save(customer);
         }
+    }
 
+    private ServiceRequest createServiceRequest(Reservation reservation, ReservationOwner reservationOwner,
+                                                ReservationRequestDTO requestDTO) {
         ServiceRequest serviceRequest = new ServiceRequest();
         serviceRequest.setAssignedTo(reservation.getProcessedBy());
-        serviceRequest.setCustomer(customer);
+        serviceRequest.setCustomer(createCustomer(reservationOwner));
         serviceRequest.setDescription(requestDTO.getFlightSummary());
         serviceRequest.setPriority(Priority.MEDIUM);
         serviceRequest.setReservation(reservation);
         serviceRequest.setRequestId(RandomStringUtils.randomAlphabetic(6));
         serviceRequest.setServiceType(ReservationType.FLIGHT);
         serviceRequest.setStatus(EntityStatus.ACTIVE);
-        serviceRequestRepository.save(serviceRequest);
+        return serviceRequestRepository.save(serviceRequest);
+    }
 
-        if (reservation.getProcessedBy() != null) {
-            ServiceRequestActorHistory actorHistory = new ServiceRequestActorHistory();
-            actorHistory.setActor(reservation.getProcessedBy());
-            actorHistory.setServiceRequest(serviceRequest);
-            actorHistory.setStatus(EntityStatus.ACTIVE);
-            serviceRequestActorHistoryRepository.save(actorHistory);
+    private ServiceRequestActorHistory createServiceRequestActorHistory(ServiceRequest serviceRequest, Reservation reservation) {
+        ServiceRequestActorHistory actorHistory = new ServiceRequestActorHistory();
+        actorHistory.setActor(reservation.getProcessedBy());
+        actorHistory.setServiceRequest(serviceRequest);
+        actorHistory.setStatus(EntityStatus.ACTIVE);
+        return serviceRequestActorHistoryRepository.save(actorHistory);
+    }
 
-            ServiceRequestLog serviceRequestLog = new ServiceRequestLog();
-            serviceRequestLog.setActor(actorHistory);
-            serviceRequestLog.setDescription(ServiceTaskType.NEW_TASK.getValue());
-            serviceRequestLog.setSubject(ServiceTaskSubject.FLIGHT_ENQUIRY);
-            serviceRequestLog.setTaskType(ServiceTaskType.NEW_TASK);
-            serviceRequestLog.setStatus(EntityStatus.ACTIVE);
-            serviceRequestLogRepository.save(serviceRequestLog);
+    private void createServiceRequestLog(ServiceRequestActorHistory actorHistory) {
+        ServiceRequestLog serviceRequestLog = new ServiceRequestLog();
+        serviceRequestLog.setActor(actorHistory);
+        serviceRequestLog.setDescription(ServiceTaskType.NEW_TASK.getValue());
+        serviceRequestLog.setSubject(ServiceTaskSubject.FLIGHT_ENQUIRY);
+        serviceRequestLog.setTaskType(ServiceTaskType.NEW_TASK);
+        serviceRequestLog.setStatus(EntityStatus.ACTIVE);
+        serviceRequestLogRepository.save(serviceRequestLog);
+    }
+
+    private Address createReservationAddress(ReservationRequestDTO requestDTO) {
+        Optional<Country> optionalCountry = countryRepository.findFirstByCode(requestDTO.getReservationOwner().getCountryCode());
+        Address address = new Address();
+        address.setName(requestDTO.getReservationOwner().getAddress());
+        address.setCity(requestDTO.getReservationOwner().getCity());
+        address.setCountry(optionalCountry.orElse(null));
+        return addressRepository.save(address);
+    }
+
+    private String mapTitleCode(int titleCode) {
+        String title = "";
+        switch (titleCode) {
+            case 0:
+                title = "MR";
+                break;
+            case 1:
+                title = "MISS";
+                break;
+            case 2:
+                title = "MASTER";
+                break;
+            case 3:
+                title = "MRS";
+                break;
         }
+        return title;
+    }
+
+    private ReservationOwner createReservationOwner(ReservationRequestDTO requestDTO, Address address) throws ParseException {
+        ReservationOwner owner = new ReservationOwner();
+        Date dob = new SimpleDateFormat("dd/MM/yyyy").parse(requestDTO.getReservationOwner().getDateOfBirth());
+        owner.setFirstName(requestDTO.getReservationOwner().getFirstName());
+        owner.setLastName(requestDTO.getReservationOwner().getLastName());
+        owner.setAddress(address);
+        owner.setDateOfBirth(new Timestamp(dob.getTime()));
+        owner.setEmail(requestDTO.getReservationOwner().getEmail());
+        owner.setPhoneNumber(requestDTO.getReservationOwner().getPhoneNumber());
+        owner.setNationality(address.getCountry());
+        owner.setTitle(mapTitleCode(requestDTO.getReservationOwner().getTitleCode()));
+
+        return reservationOwnerRepository.save(owner);
+    }
+
+    private FlightBookingDetail createFlightBookingDetail(ReservationRequestDTO requestDTO) {
+        FlightBookingDetail flightBookingDetail = new FlightBookingDetail();
+        flightBookingDetail.setBookingDate(new Timestamp(new Date().getTime()));
+        flightBookingDetail.setNumberOfAdult(requestDTO.getFlightSearch().getTravellerDetail().getAdults());
+        flightBookingDetail.setNumberOfChildren(requestDTO.getFlightSearch().getTravellerDetail().getChildren());
+        flightBookingDetail.setNumberOfInfant(requestDTO.getFlightSearch().getTravellerDetail().getInfants());
+        flightBookingDetail.setFlightSummary(requestDTO.getFlightSummary());
+        flightBookingDetail.setPnr(requestDTO.getBookingNumber());
+        return flightBookingDetailRepository.save(flightBookingDetail);
+    }
+
+    private List<FlightRoute> createFlightRoute(ReservationRequestDTO requestDTO, FlightBookingDetail flightBookingDetail)
+            throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        List<FlightRoute> flightRouteList = new ArrayList<>();
+        List<OriginDestinationOptionsDTO> originDestinationOptions = requestDTO.getFlightDetails().getOriginDestinationOptions();
+        for (int i1 = 0, originDestinationOptionsSize = originDestinationOptions.size(); i1 < originDestinationOptionsSize; i1++) {
+            OriginDestinationOptionsDTO originDestinationOptionsDTO = originDestinationOptions.get(i1);
+            List<FlightSegmentsDTO> flightSegments = originDestinationOptionsDTO.getFlightSegments();
+            for (int i = 0, flightSegmentsSize = flightSegments.size(); i < flightSegmentsSize; i++) {
+                FlightSegmentsDTO flightSegmentsDTO = flightSegments.get(i);
+                FlightRoute flightRoute = new FlightRoute();
+                flightRoute.setArrivalTime(new Timestamp(simpleDateFormat.parse(flightSegmentsDTO.getArrivalTime()).getTime()));
+                flightRoute.setDepartureAirport(flightSegmentsDTO.getDepartureAirportName());
+                flightRoute.setDepartureCityName(flightSegmentsDTO.getDepartureAirportName().split("-")[0]);
+                flightRoute.setDepartureTime(new Timestamp(simpleDateFormat.parse(flightSegmentsDTO.getDepartureTime()).getTime()));
+                flightRoute.setDestinationAirport(flightSegmentsDTO.getArrivalAirportName());
+                flightRoute.setDestinationCityName(flightSegmentsDTO.getArrivalAirportName().split("-")[0]);
+                flightRoute.setFlightDuration(flightSegmentsDTO.getJourneyDuration());
+                flightRoute.setFlightBookingDetail(flightBookingDetail);
+                flightRoute.setFlightNumber(flightSegmentsDTO.getFlightNumber());
+                flightRoute.setMarketingAirlineCode(flightSegmentsDTO.getAirlineCode());
+                flightRoute.setMarketingAirlineName(flightSegmentsDTO.getAirlineName());
+                flightRoute.setOperatingAirlineCode(flightSegmentsDTO.getAirlineCode());
+                flightRoute.setAirlineName(flightSegmentsDTO.getAirlineName());
+                flightRoute.setBookingClass(flightSegmentsDTO.getBookingClass());
+
+                flightRouteList.add(flightRoute);
+                flightRouteRepository.save(flightRoute);
+            }
+        }
+        return flightRouteList;
+    }
+
+    private Reservation persistReservation(ReservationRequestDTO requestDTO, ReservationOwner reservationOwner,
+                                           FlightBookingDetail flightBookingDetail) {
+        Reservation reservation = new Reservation();
+        reservation.setSellingPrice(requestDTO.getAmount().longValue());
+        reservation.setBookingNumber(requestDTO.getBookingNumber());
+        reservation.setReservationOwner(reservationOwner);
+        reservation.setStatus(EntityStatus.ACTIVE);
+        reservation.setTransactionFeeInKobo(0L);
+        reservation.setSupplierGroupType(SupplierGroupType.AMADEUS);
+        reservation.setMargin(0L);
+        reservation.setReservationStatus(ProcessStatus.PENDING);
+        reservation.setReservationType(ReservationType.FLIGHT);
+        reservation.setFlightBookingDetail(flightBookingDetail);
+        if (requestDTO.getPortalUsername() != null) {
+            Optional<PortalUser> optionalPortalUser = portalUserRepository.findFirstByEmailAndStatus(requestDTO.getPortalUsername(), EntityStatus.ACTIVE);
+            reservation.setProcessedBy(optionalPortalUser.get());
+        }
+        return reservationRepository.save(reservation);
+    }
+
+    private List<Traveller> createTravellers(ReservationRequestDTO requestDTO, Reservation reservation)
+            throws ParseException {
+        List<Traveller> travellerList = new ArrayList<>();
+        List<TravellerDTO> travellers = requestDTO.getTravellers();
+        for (int i = 0, travellersSize = travellers.size(); i < travellersSize; i++) {
+            TravellerDTO traveller = travellers.get(i);
+            Date dateOfBirth = new SimpleDateFormat("dd/MM/yyyy").parse(traveller.getDateOfBirth());
+
+            Traveller t = new Traveller();
+            t.setDateOfBirth(new Timestamp(dateOfBirth.getTime()));
+            t.setFirstName(traveller.getFirstName());
+            t.setLastName(traveller.getLastName());
+            t.setTitle(mapTitleCode(traveller.getTitleCode()));
+            t.setGender(traveller.getTitleCode() == 1 || traveller.getTitleCode() == 3 ? Gender.FEMALE : Gender.MALE);
+
+            travellerList.add(t);
+            t.setReservation(reservation);
+            travellerRepository.save(t);
+        }
+
+        return travellerList;
     }
 
     private void sendFlightBookingEmail(ReservationOwner owner, Reservation reservation, List<Traveller> travellers,

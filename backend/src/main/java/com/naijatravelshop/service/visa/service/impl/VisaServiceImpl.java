@@ -2,7 +2,6 @@ package com.naijatravelshop.service.visa.service.impl;
 
 import com.naijatravelshop.persistence.model.crm.Customer;
 import com.naijatravelshop.persistence.model.crm.ServiceRequest;
-import com.naijatravelshop.persistence.model.crm.ServiceRequestActorHistory;
 import com.naijatravelshop.persistence.model.crm.ServiceRequestLog;
 import com.naijatravelshop.persistence.model.enums.EntityStatus;
 import com.naijatravelshop.persistence.model.enums.Priority;
@@ -18,7 +17,6 @@ import com.naijatravelshop.persistence.repository.crm.ServiceRequestActorHistory
 import com.naijatravelshop.persistence.repository.crm.ServiceRequestLogRepository;
 import com.naijatravelshop.persistence.repository.crm.ServiceRequestRepository;
 import com.naijatravelshop.persistence.repository.portal.CountryRepository;
-import com.naijatravelshop.persistence.repository.portal.PortalUserRepository;
 import com.naijatravelshop.persistence.repository.visa.VisaCountryRepository;
 import com.naijatravelshop.persistence.repository.visa.VisaRequestRepository;
 import com.naijatravelshop.service.email.EmailService;
@@ -34,7 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,22 +76,19 @@ public class VisaServiceImpl implements VisaService {
 
     @Override
     public List<VisaCountryDTO> getAllVisaCountry() {
-        List<VisaCountryDTO> visaCountryList = new ArrayList<>();
+        List<VisaCountry> visaCountries = (List<VisaCountry>) visaCountryRepository.findAll();
 
-        for (VisaCountry visaCountry : visaCountryRepository.findAll()) {
-            VisaCountryDTO visaCountryDTO = VisaCountryDTO.builder()
-                    .name(visaCountry.getCountryName())
-                    .id(visaCountry.getId())
-                    .status(visaCountry.getStatus().getValue())
-                    .build();
-            visaCountryList.add(visaCountryDTO);
-        }
-        return visaCountryList;
+        return visaCountries.stream().map(visaCountry -> VisaCountryDTO.builder()
+                .name(visaCountry.getCountryName())
+                .id(visaCountry.getId())
+                .status(visaCountry.getStatus().getValue())
+                .build()).collect(Collectors.toList());
     }
 
     @Override
     public List<VisaCountryDTO> getAllActiveVisaCountry() {
         List<VisaCountry> visaCountryList = visaCountryRepository.getAllByStatusEquals(EntityStatus.ACTIVE);
+
         return visaCountryList.stream().map(visaCountry -> VisaCountryDTO.builder()
                 .name(visaCountry.getCountryName())
                 .id(visaCountry.getId())
@@ -119,24 +113,21 @@ public class VisaServiceImpl implements VisaService {
 
     @Override
     public VisaCountryDTO updateVisaCountry(VisaCountryDTO visaCountryDTO) {
-        VisaCountryDTO result;
-
         Optional<VisaCountry> optionalVisaCountry = visaCountryRepository.findById(visaCountryDTO.getId());
 
-        if (optionalVisaCountry.isPresent()) {
-            VisaCountry visaCountry = optionalVisaCountry.get();
-            visaCountry.setCountryName(visaCountryDTO.getName());
-            visaCountry.setStatus(EntityStatus.valueOf(visaCountryDTO.getStatus()));
-            visaCountryRepository.save(visaCountry);
-            result = VisaCountryDTO.builder()
-                    .name(visaCountryDTO.getName())
-                    .id(visaCountry.getId())
-                    .status(EntityStatus.ACTIVE.getValue())
-                    .build();
-        } else {
+        if (!optionalVisaCountry.isPresent()) {
             throw new BadRequestException("Could not find Visa Country");
         }
-        return result;
+
+        VisaCountry visaCountry = optionalVisaCountry.get();
+        visaCountry.setCountryName(visaCountryDTO.getName());
+        visaCountry.setStatus(EntityStatus.valueOf(visaCountryDTO.getStatus()));
+        visaCountryRepository.save(visaCountry);
+        return VisaCountryDTO.builder()
+                .name(visaCountryDTO.getName())
+                .id(visaCountry.getId())
+                .status(EntityStatus.ACTIVE.getValue())
+                .build();
     }
 
     @Override
@@ -191,17 +182,13 @@ public class VisaServiceImpl implements VisaService {
         visaRequest.setStatus(EntityStatus.ACTIVE);
 
         optionalCountry = countryRepository.findFirstByName(visaRequestDTO.getResidentCountry());
-        if (optionalCountry.isPresent()) {
-            visaRequest.setResidentCountry(optionalCountry.get());
-        }
+        optionalCountry.ifPresent(country -> visaRequest.setResidentCountry(country));
+
         Optional<VisaCountry> optionalVisaCountry = visaCountryRepository.findFirstByCountryName(visaRequestDTO.getDestinationCountry());
-        if (optionalVisaCountry.isPresent()) {
-            visaRequest.setDestinationCountry(optionalVisaCountry.get());
-        }
+        optionalVisaCountry.ifPresent(country -> visaRequest.setDestinationCountry(country));
+
         optionalCountry = countryRepository.findFirstByName(visaRequestDTO.getNationality());
-        if (optionalCountry.isPresent()) {
-            visaRequest.setNationality(optionalCountry.get());
-        }
+        optionalCountry.ifPresent(country -> visaRequest.setNationality(country));
 
         visaRequest.setTravelDate(new Timestamp(visaRequestDTO.getReturnDate().getTime()));
         if (visaRequestDTO.getEmploymentResumptionDate() != null) {

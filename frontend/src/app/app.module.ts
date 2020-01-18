@@ -7,7 +7,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { Service } from '../provider/api.service';
 import { LocalAPIService } from '../provider/local.api.service';
 import { TravelbetaAPIService } from '../provider/travelbeta.api.service';
 import { InitAPIService } from '../provider/init.api.service';
@@ -83,7 +82,7 @@ import { SettingsComponent } from '../pages/settings/settings.component';
       apiKey: 'AIzaSyDQUHkQkHQOd0MDdr_F0C5IFWPeB2CexpA'
     })
   ],
-  providers: [Service, AuthGuard, TravelbetaAPIService, LocalAPIService, InitAPIService],
+  providers: [AuthGuard, TravelbetaAPIService, LocalAPIService, InitAPIService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

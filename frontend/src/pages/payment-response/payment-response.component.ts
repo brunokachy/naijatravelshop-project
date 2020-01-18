@@ -9,7 +9,7 @@ import { LocalAPIService } from '../../provider/local.api.service';
     moduleId: module.id,
     selector: 'payment_response',
     templateUrl: 'payment-response.component.html',
-    styleUrls: ['payment-response.component.scss']
+    styleUrls: []
 })
 export class PaymentResponseComponent {
     paymentRef: string;

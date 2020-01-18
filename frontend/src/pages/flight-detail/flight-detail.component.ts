@@ -19,7 +19,7 @@ import { LocalAPIService } from '../../provider/local.api.service';
     moduleId: module.id,
     selector: 'flight_detail',
     templateUrl: 'flight-detail.component.html',
-    styleUrls: ['flight-detail.component.scss']
+    styleUrls: []
 })
 export class FlightDetailComponent {
     constructor(private modalService: BsModalService, private router: Router, private travelbetaAPIService: TravelbetaAPIService,

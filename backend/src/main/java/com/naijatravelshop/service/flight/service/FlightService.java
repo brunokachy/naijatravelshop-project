@@ -1,5 +1,7 @@
 package com.naijatravelshop.service.flight.service;
 
+import com.naijatravelshop.persistence.model.portal.Reservation;
+import com.naijatravelshop.persistence.model.portal.ReservationOwner;
 import com.naijatravelshop.service.flight.pojo.request.ReservationRequestDTO;
 import com.naijatravelshop.service.flight.pojo.request.VisaRequestDTO;
 import com.naijatravelshop.service.flight.pojo.response.AirportDTO;
@@ -12,5 +14,4 @@ public interface FlightService {
     ReservationResponseDTO createReservation(ReservationRequestDTO requestDTO);
 
     List<AirportDTO> getAllAirports();
-
 }

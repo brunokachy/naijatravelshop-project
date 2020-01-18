@@ -87,7 +87,6 @@ public class EmailServiceImpl implements EmailService {
             helper.setText(content, isHTML);
             mailSender.send(mailMessage);
             log.info("Email sent>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-            System.out.println("Email sent>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         } catch (MessagingException | MailException ex) {
             log.error(ex.getMessage());
             ex.printStackTrace();
@@ -100,7 +99,7 @@ public class EmailServiceImpl implements EmailService {
         Email to = new Email(recipients);
         Content content = new Content("text/html", body);
         Mail mail = new Mail(from, subject, to, content);
-       
+
         SendGrid sg = new SendGrid("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");
         Request request = new Request();
         try {
@@ -108,7 +107,7 @@ public class EmailServiceImpl implements EmailService {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sg.api(request);
-            log.info("Email sent to >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " +recipients);
+            log.info("Email sent to >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + recipients);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

@@ -25,7 +25,6 @@ export class TravelbetaAPIService {
     public GET_CITY = 'flight/get-city';
     public GET_AIRPORT = 'flight/get-airport';
     public GET_C0UNTRY = 'get-country';
-    public GET_COUNTRIES = 'get-countries';
     public PROCESS_FLIGHT_SEARCH = 'flight/process-flight-search';
     public CREATE_AFILLIATE_FLIGHT_BOOKING = 'flight/create-affiliate-booking';
     public CANCEL_RESERVATION = 'flight/cancel-reservation';

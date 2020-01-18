@@ -16,7 +16,7 @@ import { Airport } from '../../model/Airport';
     moduleId: module.id,
     selector: 'flight_search_result',
     templateUrl: 'flight-search-result.component.html',
-    styleUrls: ['flight-search-result.component.scss']
+    styleUrls: []
 })
 export class FlightSearchResultComponent {
     flight: Flight;

@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
     moduleId: module.id,
     selector: 'contactus',
     templateUrl: 'contactus.component.html',
-    styleUrls: ['contactus.component.scss']
+    styleUrls: []
 })
 export class ContactusComponent {
 

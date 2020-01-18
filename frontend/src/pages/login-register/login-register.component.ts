@@ -9,7 +9,7 @@ import { LocalAPIService } from '../../provider/local.api.service';
     moduleId: module.id,
     selector: 'login_register',
     templateUrl: 'login-register.component.html',
-    styleUrls: ['login-register.component.scss']
+    styleUrls: []
 })
 export class LoginRegisterComponent {
     constructor(private router: Router, private localAPIService: LocalAPIService, private spinnerService: NgxSpinnerService) {

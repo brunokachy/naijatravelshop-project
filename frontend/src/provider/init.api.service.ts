@@ -21,7 +21,7 @@ export class InitAPIService {
     initModel: InitModel = new InitModel();
     constructor(private httpClient: HttpClient) { }
  //  private naijaTravelShopAPIBaseURL = window.location.origin + '/naijatravelshop/api/';
- private naijaTravelShopAPIBaseURL = 'http://localhost:8080/naijatravelshop/api/';
+    private naijaTravelShopAPIBaseURL = 'http://localhost:8080/naijatravelshop/api/';
     private GET_BASE_URL = this.naijaTravelShopAPIBaseURL + 'admin/get_base_url';
     private GET_AFFILIATE_ACCOUNT = this.naijaTravelShopAPIBaseURL + 'admin/get_affiliate_account_details';
     private GET_FLUTTERWAVE_ACCOUNT_DETAILS = this.naijaTravelShopAPIBaseURL + 'payment/get_flw_account_details';

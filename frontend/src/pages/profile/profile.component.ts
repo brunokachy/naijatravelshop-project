@@ -7,7 +7,7 @@ import { LocalAPIService } from '../../provider/local.api.service';
     moduleId: module.id,
     selector: 'profile',
     templateUrl: 'profile.component.html',
-    styleUrls: ['profile.component.scss']
+    styleUrls: []
 })
 export class ProfileComponent {
     constructor(private localAPIService: LocalAPIService) {
