@@ -1,5 +1,5 @@
-import { ReservationOwner } from './reservationowner';
-import { PricedItineraries } from './pricedItineraries';
+import { ReservationOwner } from './ReservationOwner';
+import { PricedItineraries } from './PricedItineraries';
 import { FlightDataSearch } from './FlightDataSearch';
 
 export class Booking {

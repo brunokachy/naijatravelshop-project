@@ -1,16 +1,16 @@
 import { Component, TemplateRef, ViewChild } from '@angular/core';
-import { PricedItineraries } from '../../model/pricedItineraries';
+import { PricedItineraries } from '../../model/PricedItineraries';
 import { Router } from '@angular/router';
-import { OriginDestinationOptions } from '../../model/originDestinationOptions';
+import { OriginDestinationOptions } from '../../model/OriginDestinationOptions';
 import * as moment from 'moment';
-import { User } from '../../model/user';
-import { Passenger } from '../../model/passenger';
+import { User } from '../../model/User';
+import { Passenger } from '../../model/Passenger';
 import { FlightDataSearch } from '../../model/FlightDataSearch';
-import { Country } from '../../model/country';
+import { Country } from '../../model/Country';
 import { BsModalRef, BsModalService, ModalDirective, AlertComponent } from 'ngx-bootstrap';
-import { BookingResponse } from '../../model/bookingResponse';
-import { ReservationOwner } from '../../model/reservationowner';
-import { Booking } from '../../model/booking';
+import { BookingResponse } from '../../model/BookingResponse';
+import { ReservationOwner } from '../../model/ReservationOwner';
+import { Booking } from '../../model/Booking';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { TravelbetaAPIService } from '../../provider/travelbeta.api.service';
 import { LocalAPIService } from '../../provider/local.api.service';
@@ -33,6 +33,10 @@ export class FlightDetailComponent {
         this.createTravellerDetail();
         this.formatPassengerBday();
     }
+
+    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
+    isModalShown = false;
+
     pricedItinerary: PricedItineraries;
     flightSearch: FlightDataSearch;
     flightHeader: any;
@@ -58,6 +62,7 @@ export class FlightDetailComponent {
     shouldRegister = false;
     alertMessage: string;
     alerts: any[] = [];
+
     add(type, message): void {
         this.alerts.push({
             type,
@@ -69,9 +74,6 @@ export class FlightDetailComponent {
     onClosed(dismissedAlert: AlertComponent): void {
         this.alerts = this.alerts.filter(alert => alert !== dismissedAlert);
     }
-
-    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
-    isModalShown = false;
 
     getCountries() {
         this.countries = JSON.parse(localStorage.getItem('countries'));

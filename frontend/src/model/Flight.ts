@@ -1,4 +1,4 @@
-import { AirlineItineraries } from './airlineItineraries';
+import { AirlineItineraries } from './AirlineItineraries';
 export class Flight {
     public totalAirlineResult: number;
     public passportRequired: boolean;

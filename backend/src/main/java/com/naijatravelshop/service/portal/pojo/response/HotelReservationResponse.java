@@ -24,7 +24,9 @@ public class HotelReservationResponse {
     private TravellerDTO reservationOwner;
     private Date bookingDate;
 
+    @Builder.Default
     private Integer numberOfAdult = 1;
+    @Builder.Default
     private Integer numberOfChildren = 0;
     private Integer numberOfRooms;
     private Integer nights;
@@ -42,8 +44,9 @@ public class HotelReservationResponse {
     private Date paymentDate;
     private String transactionId;
     private String paymentChannel;
-
+    @Builder.Default
     private Boolean visaServiceRequested = false;
+    @Builder.Default
     private Boolean hotelServiceRequested = false;
     private List<RoomDTO> rooms;
 }

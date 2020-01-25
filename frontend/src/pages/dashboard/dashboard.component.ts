@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { User } from '../../model/user';
+import { User } from '../../model/User';
 import { LocalAPIService } from '../../provider/local.api.service';
 
 @Component({

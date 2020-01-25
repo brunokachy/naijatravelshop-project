@@ -1,6 +1,6 @@
 import { Component, ViewChild, TemplateRef } from '@angular/core';
 import { AlertComponent, ModalDirective, BsModalRef, BsModalService } from 'ngx-bootstrap';
-import { User } from '../../model/user';
+import { User } from '../../model/User';
 import { LocalAPIService } from '../../provider/local.api.service';
 
 @Component({
@@ -26,7 +26,7 @@ export class UserManagementComponent {
     portalUser: User = new User();
     selectedUserEmail = '';
 
-    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
+    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
     isModalShown = false;
 
     modalRoles: BsModalRef;

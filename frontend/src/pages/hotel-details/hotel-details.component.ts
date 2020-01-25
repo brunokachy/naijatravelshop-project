@@ -1,11 +1,11 @@
 import { Component, ViewChild, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { HotelList } from '../../model/hotelList';
+import { HotelList } from '../../model/HotelList';
 import { HotelSearch } from '../../model/HotelSearch';
 import * as moment from 'moment';
 import { BsModalRef, BsModalService, ModalDirective } from 'ngx-bootstrap';
 import { RoomDetailList } from '../../model/RoomDetailList';
-import { User } from '../../model/user';
+import { User } from '../../model/User';
 import { Country } from '../../model/Country';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { LocalAPIService } from '../../provider/local.api.service';
@@ -32,7 +32,7 @@ export class HotelDetailsComponent {
     shouldRegister = false;
     alertMessage: string;
 
-    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
+    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
     isModalShown = false;
 
     constructor(private modalService: BsModalService, private router: Router,

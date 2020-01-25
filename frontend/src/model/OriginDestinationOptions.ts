@@ -1,4 +1,4 @@
-import { FlightSegments } from './flightSegments';
+import { FlightSegments } from './FlightSegments';
 export class OriginDestinationOptions {
 
     public stops: number;

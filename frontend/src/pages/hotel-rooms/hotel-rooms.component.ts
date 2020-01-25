@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { HotelList } from '../../model/hotelList';
+import { HotelList } from '../../model/HotelList';
 import { HotelSearch } from '../../model/HotelSearch';
 import { BsModalRef } from 'ngx-bootstrap';
 import { AgmMap } from '@agm/core';
@@ -19,7 +19,7 @@ export class HotelRoomsComponent {
     modalRef: BsModalRef;
     zoom = 15;
 
-    @ViewChild('map') gmapElement: AgmMap;
+    @ViewChild('map', { static: false }) gmapElement: AgmMap;
     public map: any = { lat: 51.678418, lng: 7.809007 };
 
     constructor(private router: Router) {

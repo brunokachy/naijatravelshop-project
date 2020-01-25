@@ -9,7 +9,7 @@ import { Country } from '../../model/Country';
 import { VisaRequest } from '../../model/VisaRequest';
 import { TravelbetaAPIService } from '../../provider/travelbeta.api.service';
 import { LocalAPIService } from '../../provider/local.api.service';
-import { User } from '../../model/user';
+import { User } from '../../model/User';
 import { Airport } from '../../model/Airport';
 import { TopDeal } from '../../model/TopDeals';
 import { HotelCity } from '../../model/HotelCity';
@@ -25,12 +25,13 @@ import { HotelSearch } from '../../model/HotelSearch';
 })
 export class HomeComponent {
     initModel: InitModel = new InitModel();
-    @ViewChild('departureCity1') departureCityElement1: ElementRef;
-    @ViewChild('destinationCity1') destinationCityElement1: ElementRef;
-    @ViewChild('departureCity2') departureCityElement2: ElementRef;
-    @ViewChild('destinationCity2') destinationCityElement2: ElementRef;
-    @ViewChild('hotelCityElement') hotelCityElement: ElementRef;
-    @ViewChild('visaAlert') visaAlertElement: ElementRef;
+    @ViewChild('departureCity1', { static: false }) departureCityElement1: ElementRef;
+    @ViewChild('destinationCity1', { static: false }) destinationCityElement1: ElementRef;
+    @ViewChild('departureCity2', { static: false }) departureCityElement2: ElementRef;
+    @ViewChild('destinationCity2', { static: false }) destinationCityElement2: ElementRef;
+    @ViewChild('hotelCityElement', { static: false }) hotelCityElement: ElementRef;
+    @ViewChild('visaAlert', { static: false }) visaAlertElement: ElementRef;
+    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
 
     constructor(private TBservice: TravelbetaAPIService, private router: Router, private activatedRoute: ActivatedRoute,
         private spinner: NgxSpinnerService, private localService: LocalAPIService, private modalService: BsModalService) {
@@ -126,7 +127,6 @@ export class HomeComponent {
     visaCountries: Country[] = [];
     naeuCountries: Country[] = [];
 
-    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
     isModalShown = false;
     modalMultiTrip: BsModalRef;
 

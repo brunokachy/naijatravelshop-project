@@ -1,4 +1,4 @@
-import { OriginDestinationOptions } from './originDestinationOptions';
+import { OriginDestinationOptions } from './OriginDestinationOptions';
 export class PricedItineraries {
     public sequencyNumber: number;
     public totalFare: number;

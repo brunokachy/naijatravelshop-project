@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { User } from '../../model/user';
+import { User } from '../../model/User';
 import { AlertComponent } from 'ngx-bootstrap';
 import { LocalAPIService } from '../../provider/local.api.service';
 

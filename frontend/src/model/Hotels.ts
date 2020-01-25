@@ -1,4 +1,4 @@
-import { HotelList } from './hotelList';
+import { HotelList } from './HotelList';
 export class Hotels {
     constructor(
     ) { }

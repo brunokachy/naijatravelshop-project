@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { PricedItineraries } from '../../model/pricedItineraries';
+import { PricedItineraries } from '../../model/PricedItineraries';
 import { User } from '../../model/User';
 import { BookingResponse } from '../../model/BookingResponse';
 import { Router } from '@angular/router';
@@ -7,7 +7,7 @@ import * as moment from 'moment';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { InitModel } from '../../model/InitModel';
 import { LocalAPIService } from '../../provider/local.api.service';
-import { HotelList } from '../../model/hotelList';
+import { HotelList } from '../../model/HotelList';
 import { HotelSearch } from '../../model/HotelSearch';
 declare var getpaidSetup;
 @Component({

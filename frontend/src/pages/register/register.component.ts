@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { AlertComponent } from 'ngx-bootstrap';
 import { Router } from '@angular/router';
-import { User } from '../../model/user';
+import { User } from '../../model/User';
 import { LocalAPIService } from '../../provider/local.api.service';
 
 @Component({

@@ -1,8 +1,8 @@
 import { Component, TemplateRef } from '@angular/core';
-import { Flight } from '../../model/flight';
-import { PricedItineraries } from '../../model/pricedItineraries';
+import { Flight } from '../../model/Flight';
+import { PricedItineraries } from '../../model/PricedItineraries';
 import * as moment from 'moment';
-import { OriginDestinationOptions } from '../../model/originDestinationOptions';
+import { OriginDestinationOptions } from '../../model/OriginDestinationOptions';
 import { BsModalService, BsModalRef, TypeaheadMatch } from 'ngx-bootstrap';
 import { Router } from '@angular/router';
 import { FlightDataSearch } from '../../model/FlightDataSearch';

@@ -2,7 +2,7 @@ import { Component, ViewChild, TemplateRef } from '@angular/core';
 import * as moment from 'moment';
 import { AlertComponent, ModalDirective, BsModalRef, BsModalService } from 'ngx-bootstrap';
 import { LocalAPIService } from '../../provider/local.api.service';
-import { User } from '../../model/user';
+import { User } from '../../model/User';
 
 @Component({
     moduleId: module.id,
@@ -41,7 +41,7 @@ export class ReservationComponent {
     bookingStatusHotel: string;
     bookingNumberHotel: string;
 
-    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
+    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
     isModalShown = false;
 
     flightData: any[] = [];

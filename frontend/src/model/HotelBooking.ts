@@ -1,4 +1,4 @@
-import { User } from './user';
+import { User } from './User';
 import { RoomDetailList } from './RoomDetailList';
 
 export class HotelBooking {

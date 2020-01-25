@@ -1,4 +1,4 @@
-import { PricedItineraries } from './pricedItineraries';
+import { PricedItineraries } from './PricedItineraries';
 export class AirlineItineraries {
     public airlineCode: string;
     public airlineName: string;
