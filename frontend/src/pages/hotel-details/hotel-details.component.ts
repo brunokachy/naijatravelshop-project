@@ -32,7 +32,7 @@ export class HotelDetailsComponent {
     shouldRegister = false;
     alertMessage: string;
 
-    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
+    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
     isModalShown = false;
 
     constructor(private modalService: BsModalService, private router: Router,

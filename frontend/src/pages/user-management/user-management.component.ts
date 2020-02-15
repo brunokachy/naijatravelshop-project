@@ -26,7 +26,7 @@ export class UserManagementComponent {
     portalUser: User = new User();
     selectedUserEmail = '';
 
-    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
+    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
     isModalShown = false;
 
     modalRoles: BsModalRef;

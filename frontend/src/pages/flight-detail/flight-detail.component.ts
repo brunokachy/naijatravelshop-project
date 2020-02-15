@@ -34,7 +34,7 @@ export class FlightDetailComponent {
         this.formatPassengerBday();
     }
 
-    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
+    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
     isModalShown = false;
 
     pricedItinerary: PricedItineraries;

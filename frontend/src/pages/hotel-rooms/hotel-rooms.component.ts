@@ -19,7 +19,7 @@ export class HotelRoomsComponent {
     modalRef: BsModalRef;
     zoom = 15;
 
-    @ViewChild('map', { static: false }) gmapElement: AgmMap;
+    @ViewChild('map') gmapElement: AgmMap;
     public map: any = { lat: 51.678418, lng: 7.809007 };
 
     constructor(private router: Router) {

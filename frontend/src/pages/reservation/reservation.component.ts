@@ -41,7 +41,7 @@ export class ReservationComponent {
     bookingStatusHotel: string;
     bookingNumberHotel: string;
 
-    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
+    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
     isModalShown = false;
 
     flightData: any[] = [];

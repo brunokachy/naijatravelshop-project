@@ -8,8 +8,8 @@ import { Observable } from 'rxjs';
 export class LocalAPIService {
     constructor(private httpClient: HttpClient) { }
 
-    //private naijaTravelShopAPIBaseURL = window.location.origin + '/naijatravelshop/api/';
-    private naijaTravelShopAPIBaseURL = 'http://localhost:8080/naijatravelshop/api/';
+    private naijaTravelShopAPIBaseURL = window.location.origin + '/naijatravelshop/api/';
+   // private naijaTravelShopAPIBaseURL = 'http://localhost:8080/naijatravelshop/api/';
 
     public CONFIRM_REGISTRATION = this.naijaTravelShopAPIBaseURL + 'confirm_registration';
     public CREATE_ACCOUNT = this.naijaTravelShopAPIBaseURL + 'admin/create_account';

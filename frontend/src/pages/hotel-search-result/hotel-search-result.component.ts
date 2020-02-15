@@ -42,7 +42,7 @@ export class HotelSearchResultComponent {
     maxPrice = 0;
     minPrice = 0;
 
-    @ViewChild('autoShownModal', { static: false }) autoShownModal: ModalDirective;
+    @ViewChild('autoShownModal') autoShownModal: ModalDirective;
     isModalShown = false;
 
     constructor(private router: Router, private modalService: BsModalService, private spinnerService: NgxSpinnerService,
